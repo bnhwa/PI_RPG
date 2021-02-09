@@ -1,0 +1,6 @@
+moving_entity=1
+hp=10
+velocity=5
+attack=staff
+range=5
+sprite_screen_ratio=10
