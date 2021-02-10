@@ -59,6 +59,7 @@ class Entity(pg.sprite.Sprite):
         ######################
         self.jumping = False
         self.running = False
+        self.onGround = False
         self.crouching = False
         self.move_frame = 0
         ######################
@@ -67,6 +68,7 @@ class Entity(pg.sprite.Sprite):
         self.state_dict = {}
         # {        run:{left:[], right:[]}    }
         self.state_frames = {}
+        self.state_inc = {}
         #run right or left same frames
         # run: 10 e.t.c.
         
@@ -95,6 +97,7 @@ class Entity(pg.sprite.Sprite):
                 fls, pth =  ut.get_files(curr_path+"sprites"+"\\"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
+                self.state_inc[spr]=float(60/len(fls))/12
                 #if self.moving_entity
                 self.state_dict[spr]={
                     'right': [],
@@ -168,31 +171,21 @@ class moving_entity(Entity):
         self.acc = vec(0,0)
         self.direction = "right"
         self.state = "idle"
-        
-    def move(self):
-        
-        self.acc.x += self.vel.x * FRIC
-        self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc  #
-        # self.rect.midbottom = self.pos
-        self.rect.center = self.pos
-        
-        pass
+
     def attack(self):
         pass
     
-    def jump(self,terrain):
-        self.rect.x += 1
-     
-        # Check to see if payer is in contact with the ground
-        hits = pg.sprite.spritecollide(self, terrain, False)
-         
-        self.rect.x -= 1
-     
+    def jump(self):
+        # print("oppai")
         # If touching the ground, and not currently jumping, cause the player to jump.
-        if hits and not self.jumping:
-           self.jumping = True
-           self.vel.y = -12
+        if self.onGround and not self.jumping:
+            self.state="jumping"
+            self.onGround = False
+            self.jumping = True
+            self.vel.y = -50
+            self.vel += self.acc
+            self.pos += self.vel + 0.5 * self.acc  #
+            self.rect.midbottom = self.pos
        
        
     def stop(self):
@@ -209,21 +202,24 @@ class moving_entity(Entity):
         self.rect.midbottom = self.pos
         #self.rect.center = self.pos
         # print(self.pos)
-        if abs(self.vel.x) > 0.3:
-            self.running = True
-            self.state = "run"
-        else:
-            self.running = False
-            self.state = "idle"
-        if self.jumping == False and self.running == True:  
-              if self.vel.x > 0:
-                    self.direction = "right"
-              elif self.vel.x < 0:
-                    self.direction = "left"
+        if self.onGround:
+            if abs(self.vel.x) > 0.3:
+                
+                self.running = True
+                self.state = "run"
+            else:
+                self.running = False
+                self.state = "idle"
+            
+        # if self.jumping == False and self.running == True:  
+        if self.vel.x > 0:
+            self.direction = "right"
+        elif self.vel.x < 0:
+            self.direction = "left"
         if abs(self.vel.x) < 0.2 and self.move_frame != 0:
             self.move_frame = 0
 
-        self.move_frame += 0.5
+        self.move_frame += self.state_inc[self.state]
         
         if  self.move_frame> self.state_frames[self.state]-1:
             self.move_frame=0
@@ -232,7 +228,7 @@ class moving_entity(Entity):
         screen.blit(self.image, self.rect)
 
 
-class Player1(object):
+class Player(object):
     def __init__(self,entity):
         
         #make list of entities
@@ -250,16 +246,16 @@ class Player1(object):
         self.state = "idle"
         self.entity.stop()
         if pressed_keys[pg.K_LEFT]:
-            # self.entity.move()
-            # self.state = "run"
-            # print(self.entity.pos)
+
             self.entity.acc.x = -self.entity.accel
         if pressed_keys[pg.K_RIGHT]:
-            # self.entity.move()
-            # self.state = "run"
+
             self.entity.acc.x = self.entity.accel#ACC 
+            
         # if pressed_keys[pg.K_DOWN]:
         #     self.state="crouch"
+        if pressed_keys[pg.K_SPACE]:
+            self.entity.jump()
 
 class attack(Entity):
     
@@ -274,23 +270,6 @@ class attack(Entity):
         #attributes.txt
         
         
-        
-class Player(pg.sprite.Sprite):
-
-    def __init__(self, pos):
-        super(Player, self).__init__()
-        
-
-        
-        self.image = pg.image.load("Player_Sprite_R.png")
-        self.rect = self.image.get_rect()
-        
-        self.image = pg.Surface((120, 120), pg.SRCALPHA)
-        pg.draw.polygon(self.image, (0, 100, 240), [(60, 0), (120, 120), (0, 120)])
-        self.rect = self.image.get_rect(center=pos)
-        self.mask = pg.mask.from_surface(self.image)
-    def loadImages(self):
-        pass
 
 
 class Enemy(pg.sprite.Sprite):
@@ -333,6 +312,9 @@ class Level(object):
         
         
     def terrain_check(self,moving_ent):
+        """
+        naive collision handling with background sprite
+        """
         #apply gravity if no collision
         hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
         # if moving_ent.vel.y > 0:
@@ -342,18 +324,14 @@ class Level(object):
             moving_ent.vel.y = 0
             moving_ent.acc.y = 0
             moving_ent.jumping = False
-            #only for individual rectangles
-            # if moving_ent.pos.y < lowest.rect.bottom:
-            #     # moving_ent.pos.y = lowest.rect.top + 1
-            #     moving_ent.vel.y = 0
-            #     moving_ent.acc.y = 0
-            #     moving_ent.jumping = False
-        # else:
-        # #apply gravity if no collision
-        #     pg.display.set_caption('falling')
-            # moving_ent.acc.y=+9;
+            moving_ent.onGround = True
+        else:
+            moving_ent.onGround = False
 
     def rect_check(self,moving_ent):
+        """
+        collision handling with individual rect platforms with anti-clipping
+        """
         #collision handling with individual platforms
         #apply gravity if no collision
         hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
@@ -361,7 +339,7 @@ class Level(object):
         if hits:
             #only for individual rectangles
             if moving_ent.pos.y < lowest.rect.bottom:
-                # moving_ent.pos.y = lowest.rect.top + 1
+                moving_ent.pos.y = lowest.rect.top + 1
                 moving_ent.vel.y = 0
                 moving_ent.acc.y = 0
                 moving_ent.jumping = False
@@ -410,8 +388,7 @@ def resize_img(image,cX = None, cY =None):
 class Game:
     def __init__(self):
         self.screen = pg.display.set_mode((screen_width, screen_height))
-        # self.player = Player((20, 20))
-        self.player =  Player1('jeanne')
+        self.player =  Player('jeanne')
         
         self.level = "level_1"
         
@@ -431,6 +408,7 @@ class Game:
 
             self.player.update(self.screen)
             pg.display.flip()
+            #set fps
             self.clock.tick(60)
             #self.clock.tick(60)
 
@@ -438,13 +416,10 @@ class Game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.done = True
-            # elif event.type == pg.MOUSEMOTION:
-            #     self.player.entity.rect.center = event.pos
+
 
     def update(self):
-
-
-        
+        #updates
         
         
         
