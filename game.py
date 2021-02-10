@@ -76,13 +76,7 @@ class Entity(pg.sprite.Sprite):
         self.image = pg.image.load(curr_path+"base.png")
         self.image = self.resize_img(self.image)
         self.rect = self.image.get_rect()
-        print(self.rect.size)
-        # if scale is not None:
-            
-        #     oldx, oldy = self.image.get_rect().size
-        #     self.image = pg.transform.scale(picture, (oldx*2, oldy*2))
-        
-        #open attributes.txt
+        # print(self.rect.size)
         
         
         if verbose:
@@ -92,7 +86,7 @@ class Entity(pg.sprite.Sprite):
         #load sprites
         dirs, poo = ut.get_dirs(curr_path+"sprites",prepended=True)
         # print(dirs)
-        if self.moving_entity:
+        if hasattr(self, "moving_entity"):
             for spr in dirs:
                 fls, pth =  ut.get_files(curr_path+"sprites"+"\\"+spr,".png" ,prepended=True)
                 
@@ -104,10 +98,20 @@ class Entity(pg.sprite.Sprite):
                     'left' : [],
                     'base' : []
                     }
+                resizing = curr_path+"sprites"+"\\"+spr+"\\sizing.txt"
+                # print(resizing)
+                resizeX = None
+                if os.path.exists(resizing):
+                    fl_tmp = open(resizing)
+                    resizeX = ut.t_convert(fl_tmp.read())
+                    fl_tmp.close()
+                    
                 for f in fls:
                     #default sprites are oriented to the left
                     img_left = pg.image.load(pth+f)
-                    img_left=self.resize_img(img_left)
+
+                    
+                    img_left=self.resize_img(img_left,sprite_ratio = resizeX)
                     #build right image
                     img_right = pg.transform.flip(img_left, True, False)
                     self.state_dict[spr]['right'].append(img_right)
@@ -129,10 +133,13 @@ class Entity(pg.sprite.Sprite):
                     self.state_dict[spr]['base'].append(img_base)
 
             
-    def resize_img(self,image,cX = None, cY =None):
+    def resize_img(self,image,cX = None, cY =None,sprite_ratio=None):
         
         newX, newY = 0,0
         oldx, oldy = image.get_rect().size
+        if sprite_ratio is not None:
+            ratio = (screen_width/oldx)/sprite_ratio
+            return pg.transform.scale(image, (int(oldx*ratio), int(oldy*ratio)))            
         if cX is None and cY is None:
             #resize to sprite-to screen ratio in attributes.txt
             ratio = (screen_width/oldx)/self.sprite_screen_ratio
@@ -150,9 +157,6 @@ class Entity(pg.sprite.Sprite):
         return image     
         
     
-    
-    def imgs_state_dict(self):
-        pass
 
     
     def update(self):
@@ -171,12 +175,20 @@ class moving_entity(Entity):
         self.acc = vec(0,0)
         self.direction = "right"
         self.state = "idle"
+        ##########
+        self.hp = self.max_hp
 
+        
+    def reset(self):
+
+        self.hp=self.max_hp
+        
     def attack(self):
         pass
     
     def jump(self):
         # print("oppai")
+        self.hp = 0
         # If touching the ground, and not currently jumping, cause the player to jump.
         if self.onGround and not self.jumping:
             self.state="jumping"
@@ -196,28 +208,34 @@ class moving_entity(Entity):
         #self.state
         #self.image = 
         # self.move()
+
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc  #
         self.rect.midbottom = self.pos
         #self.rect.center = self.pos
         # print(self.pos)
-        if self.onGround:
-            if abs(self.vel.x) > 0.3:
+        if self.hp>0:
+            if self.onGround:
+                if abs(self.vel.x) > 0.3:
+                    
+                    self.running = True
+                    self.state = "run"
+                else:
+                    self.running = False
+                    self.state = "idle"
                 
-                self.running = True
-                self.state = "run"
-            else:
-                self.running = False
-                self.state = "idle"
-            
-        # if self.jumping == False and self.running == True:  
-        if self.vel.x > 0:
-            self.direction = "right"
-        elif self.vel.x < 0:
-            self.direction = "left"
-        if self.state != "idle" and abs(self.vel.x) < 0.2 and self.move_frame != 0:
-            self.move_frame = 0
+            # if self.jumping == False and self.running == True:  
+            if self.vel.x > 0:
+                self.direction = "right"
+            elif self.vel.x < 0:
+                self.direction = "left"
+            if self.state != "idle" and abs(self.vel.x) < 0.2 and self.move_frame != 0:
+                self.move_frame = 0
+        else:
+            self.state="dead"
+
+
 
         self.move_frame += self.state_inc[self.state]
         
@@ -225,6 +243,8 @@ class moving_entity(Entity):
             self.move_frame=0
         # print(self.state_frames[self.state])
         self.image = self.state_dict[self.state][self.direction][ int(self.move_frame)]
+        # else:
+            # self.state = "dead"
         screen.blit(self.image, self.rect)
 
 
@@ -245,16 +265,25 @@ class Player(object):
         pressed_keys = pg.key.get_pressed()
         self.state = "idle"
         self.entity.stop()
-        if pressed_keys[pg.K_LEFT]:
-
-            self.entity.acc.x = -self.entity.accel
-        if pressed_keys[pg.K_RIGHT]:
-            self.entity.acc.x = self.entity.accel#ACC 
+        if self.entity.hp>0: 
+            if pressed_keys[pg.K_LEFT]:
+    
+                self.entity.acc.x = -self.entity.accel
+            if pressed_keys[pg.K_RIGHT]:
+                self.entity.acc.x = self.entity.accel#ACC 
+                
+            # if pressed_keys[pg.K_DOWN]:
+            #     self.state="crouch"
+            if pressed_keys[pg.K_SPACE]:
+                self.entity.jump()
+                
+        
+        if pressed_keys[pg.K_r]:
+            self.entity.reset()        
+                
             
-        # if pressed_keys[pg.K_DOWN]:
-        #     self.state="crouch"
-        if pressed_keys[pg.K_SPACE]:
-            self.entity.jump()
+        
+        #pg.K_a attack
 
 class Attacks(Entity):
     
@@ -304,9 +333,20 @@ class Level(object):
         
         
     def load_entities(self):
-        pass
-    
+        #load entities, set each to alive
+        attr_fl = open(curr_path+"attributes.txt", "r")
+        attr_list = list(map(lambda x: [x[0],ut.t_convert(x[1])], [i.split("=") for i in attr_fl.read().replace(' ', "")\
+                        .split("\n") if i.strip() != ""]))
+        # if verbose: print(content_list)
         
+        attr_fl.close()
+        # for a,v in attr_list:
+        #     setattr(self,a,v)
+        
+    
+    def reset(self):
+        #reset entities and their positions
+        pass
     def update(self,screen):
         self.bg.update(screen)
         self.terrain.update(screen)
@@ -429,8 +469,8 @@ class Game:
 
             self.player.update(self.screen)
             pg.display.flip()
-            #set fps
-            self.clock.tick(60)
+            #set fps pi 30 fps bc its a potato
+            self.clock.tick(30)
             
             
             
@@ -469,7 +509,15 @@ def load_entities(verbose = False):
         print(ok)
         # print(os.listdir(ok))
         game_entities[i] = moving_entity(i,curr_path+i+"\\")
-        
+
+    dirs, curr_path = ut.get_dirs("\\bin\\enemies")
+    for i in dirs:
+        if verbose :
+            print(i)
+        ok = curr_path+i+"\\"
+        print(ok)
+        # print(os.listdir(ok))
+        game_entities[i] = moving_entity(i,curr_path+i+"\\")
     #levels
     
     

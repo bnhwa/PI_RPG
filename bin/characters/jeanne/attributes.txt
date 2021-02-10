@@ -1,5 +1,5 @@
 moving_entity=1
-hp=10
+max_hp=10
 accel=5
 velocity=5
 attack=staff
