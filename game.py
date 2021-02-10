@@ -17,7 +17,7 @@ import copy
 ##globals
 game_entities = {}
 game_levels = {}
-
+game_attacks = {}
 #screenx screeny
 root = Tk() 
 screen_height = root.winfo_screenheight() 
@@ -97,7 +97,7 @@ class Entity(pg.sprite.Sprite):
                 fls, pth =  ut.get_files(curr_path+"sprites"+"\\"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
-                self.state_inc[spr]=float(60/len(fls))/12
+                self.state_inc[spr]=float(60/len(fls))/20
                 #if self.moving_entity
                 self.state_dict[spr]={
                     'right': [],
@@ -216,7 +216,7 @@ class moving_entity(Entity):
             self.direction = "right"
         elif self.vel.x < 0:
             self.direction = "left"
-        if abs(self.vel.x) < 0.2 and self.move_frame != 0:
+        if self.state != "idle" and abs(self.vel.x) < 0.2 and self.move_frame != 0:
             self.move_frame = 0
 
         self.move_frame += self.state_inc[self.state]
@@ -249,7 +249,6 @@ class Player(object):
 
             self.entity.acc.x = -self.entity.accel
         if pressed_keys[pg.K_RIGHT]:
-
             self.entity.acc.x = self.entity.accel#ACC 
             
         # if pressed_keys[pg.K_DOWN]:
@@ -257,7 +256,7 @@ class Player(object):
         if pressed_keys[pg.K_SPACE]:
             self.entity.jump()
 
-class attack(Entity):
+class Attacks(Entity):
     
     """
     attack class, 
@@ -267,10 +266,17 @@ class attack(Entity):
     
     def __init__(self, name,curr_path,scale = None):
         super(Player1, self).__init__(name,curr_path)
+        
         #attributes.txt
         
         
-
+class Enemies(moving_entity):
+    def __init__(self,entity):    
+        #make list of entities
+        global game_entities 
+    def update(self):
+        #depending on attack strategy, employ different one
+        pass
 
 class Enemy(pg.sprite.Sprite):
 
@@ -280,6 +286,8 @@ class Enemy(pg.sprite.Sprite):
         pg.draw.circle(self.image, (240, 100, 0), (60, 60), 60)
         self.rect = self.image.get_rect(center=pos)
         self.mask = pg.mask.from_surface(self.image)
+    
+    
 
 
 
@@ -305,10 +313,16 @@ class Level(object):
         ###########################
         # Collision Checking
         ###########################
-        #apply gravity and terrain check with 
+        #--------------------------
+        #apply gravity and terrain check
+        #--------------------------
         for m in self.mov_entities:
             m.acc.y=+3;
             self.terrain_check(m)
+        #--------------------------
+        # entity - entity collision
+        #--------------------------
+        
         
         
     def terrain_check(self,moving_ent):
@@ -317,16 +331,15 @@ class Level(object):
         """
         #apply gravity if no collision
         hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
-        # if moving_ent.vel.y > 0:
         if hits:
-            # print("faw")
-            lowest = hits[0]
             moving_ent.vel.y = 0
             moving_ent.acc.y = 0
             moving_ent.jumping = False
             moving_ent.onGround = True
+            # moving_ent.pos.y+=5
         else:
             moving_ent.onGround = False
+            moving_ent.state="jumping"
 
     def rect_check(self,moving_ent):
         """
@@ -335,7 +348,6 @@ class Level(object):
         #collision handling with individual platforms
         #apply gravity if no collision
         hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
-        # if moving_ent.vel.y > 0:
         if hits:
             #only for individual rectangles
             if moving_ent.pos.y < lowest.rect.bottom:
@@ -358,7 +370,7 @@ class Background(pg.sprite.Sprite):
             self.image = pg.image.load(curr_path+"background.png")
         else:
             self.image = pg.image.load(curr_path+name)
-        self.image = resize_img(self.image,cX=screen_width)
+        self.image = resize_img(self.image,cY=screen_height)
         self.rect = self.image.get_rect(center=(int(screen_width/2),int(screen_height/2)))
         self.mask = pg.mask.from_surface(self.image)
         print(self.rect.size)
@@ -385,11 +397,17 @@ def resize_img(image,cX = None, cY =None):
         return pg.transform.scale(image, (int(oldx*ratioX), int(oldy*ratioY)))
     return image     
 #####################################     
+
+
+
+
+
+
 class Game:
     def __init__(self):
         self.screen = pg.display.set_mode((screen_width, screen_height))
         self.player =  Player('jeanne')
-        
+        self.game_state=1
         self.level = "level_1"
         
         for k,v in game_levels.items():
@@ -403,6 +421,9 @@ class Game:
     def run(self):
         while not self.done:
             self.event_loop()
+            
+            
+            
             game_levels[self.level].update(self.screen)
             self.update()
 
@@ -410,6 +431,9 @@ class Game:
             pg.display.flip()
             #set fps
             self.clock.tick(60)
+            
+            
+            
             #self.clock.tick(60)
 
     def event_loop(self):
@@ -429,10 +453,8 @@ class Game:
         else:
             pg.display.set_caption('no collision')
 
-    # def draw(self):
-    #     pass
-    #     # self.screen.fill((30, 30, 30))
-    #     self.all_sprites.draw(self.screen)
+    def main_menu(self):
+        pass
 
 def load_entities(verbose = False):
     global game_entities

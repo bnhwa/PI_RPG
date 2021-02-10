@@ -11,7 +11,6 @@ import sys
 ####################
 def get_dirs(str_in,prepended = False):
 
-    # print(os.getcwd()+str_in+"\\")
     if prepended:
         return [name for name in os.listdir(str_in+"\\") if os.path.isdir(str_in+"\\"+name)],str_in
     else:
@@ -31,9 +30,7 @@ def get_files(str_in,ext, prepended = False, append = False):
     if append:
         ret = [dj+"\\"+r for r in ret]
     return ret,retDir
-    # return [name for name in os.listdir(os.getcwd()+str_in+"\\") if os.path.isdir(dj+name)],dj
-    # os.getcwd()+"\\bin\\characters"
-    # pass
+
 ####################
 # dt utils
 ####################
