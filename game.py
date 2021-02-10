@@ -59,6 +59,7 @@ class Entity(pg.sprite.Sprite):
         ######################
         self.jumping = False
         self.running = False
+        self.crouching = False
         self.move_frame = 0
         ######################
         #animations
@@ -180,16 +181,33 @@ class moving_entity(Entity):
     def attack(self):
         pass
     
-    def jump(self):
-        pass
+    def jump(self,terrain):
+        self.rect.x += 1
+     
+        # Check to see if payer is in contact with the ground
+        hits = pg.sprite.spritecollide(self, terrain, False)
+         
+        self.rect.x -= 1
+     
+        # If touching the ground, and not currently jumping, cause the player to jump.
+        if hits and not self.jumping:
+           self.jumping = True
+           self.vel.y = -12
+       
+       
     def stop(self):
         self.vel.x=0
+        self.acc.x=0
         
     def update(self,screen):
         #self.state
         #self.image = 
         # self.move()
-        
+        self.acc.x += self.vel.x * FRIC
+        self.vel += self.acc
+        self.pos += self.vel + 0.5 * self.acc  #
+        self.rect.midbottom = self.pos
+        #self.rect.center = self.pos
         # print(self.pos)
         if abs(self.vel.x) > 0.3:
             self.running = True
@@ -216,26 +234,32 @@ class moving_entity(Entity):
 
 class Player1(object):
     def __init__(self,entity):
+        
+        #make list of entities
         global game_entities
         if entity in game_entities.keys():
             self.entity = copy.copy(game_entities[entity])
             
         # super(Player1, self).__init__(name,curr_path)
     def update(self,screen):
+        
+        # print(self.entity.pos)
+        
         self.entity.update(screen)
         pressed_keys = pg.key.get_pressed()
         self.state = "idle"
         self.entity.stop()
         if pressed_keys[pg.K_LEFT]:
-            self.entity.move()
+            # self.entity.move()
             # self.state = "run"
             # print(self.entity.pos)
-            self.entity.acc.x = -ACC
+            self.entity.acc.x = -self.entity.accel
         if pressed_keys[pg.K_RIGHT]:
-            self.entity.move()
+            # self.entity.move()
             # self.state = "run"
-            self.entity.acc.x = ACC 
-
+            self.entity.acc.x = self.entity.accel#ACC 
+        # if pressed_keys[pg.K_DOWN]:
+        #     self.state="crouch"
 
 class attack(Entity):
     
@@ -256,7 +280,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, pos):
         super(Player, self).__init__()
         
-        
+
         
         self.image = pg.image.load("Player_Sprite_R.png")
         self.rect = self.image.get_rect()
@@ -288,37 +312,82 @@ class Level(object):
         self.x = 1;
         self.bg =Background(curr_path)
         self.terrain =Background(curr_path,name = "terrain.png")
+        self.collidebg=pg.sprite.Group(self.terrain)
+        self.mov_entities = []
+        
+        
+    def load_entities(self):
+        pass
+    
         
     def update(self,screen):
         self.bg.update(screen)
         self.terrain.update(screen)
+        ###########################
+        # Collision Checking
+        ###########################
+        #apply gravity and terrain check with 
+        for m in self.mov_entities:
+            m.acc.y=+3;
+            self.terrain_check(m)
         
         
     def terrain_check(self,moving_ent):
-          hits = pg.sprite.spritecollide(moving_ent ,self.terrain, False)
-          if moving_ent.vel.y > 0:
-              if hits:
-                  lowest = hits[0]
-                  if moving_ent.pos.y < lowest.rect.bottom:
-                      moving_ent.pos.y = lowest.rect.top + 1
-                      moving_ent.vel.y = 0
-                      moving_ent.jumping = False
-                      
+        #apply gravity if no collision
+        hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
+        # if moving_ent.vel.y > 0:
+        if hits:
+            # print("faw")
+            lowest = hits[0]
+            moving_ent.vel.y = 0
+            moving_ent.acc.y = 0
+            moving_ent.jumping = False
+            #only for individual rectangles
+            # if moving_ent.pos.y < lowest.rect.bottom:
+            #     # moving_ent.pos.y = lowest.rect.top + 1
+            #     moving_ent.vel.y = 0
+            #     moving_ent.acc.y = 0
+            #     moving_ent.jumping = False
+        # else:
+        # #apply gravity if no collision
+        #     pg.display.set_caption('falling')
+            # moving_ent.acc.y=+9;
+
+    def rect_check(self,moving_ent):
+        #collision handling with individual platforms
+        #apply gravity if no collision
+        hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
+        # if moving_ent.vel.y > 0:
+        if hits:
+            #only for individual rectangles
+            if moving_ent.pos.y < lowest.rect.bottom:
+                # moving_ent.pos.y = lowest.rect.top + 1
+                moving_ent.vel.y = 0
+                moving_ent.acc.y = 0
+                moving_ent.jumping = False
+
+    def collision_entities(self):
+        #collide one by one
+        # pg.sprite.spritecollide(self.player.entity, self.enemies, False, pg.sprite.collide_mask)
+        pass
 class Background(pg.sprite.Sprite):
     def __init__(self,curr_path,name = None):
-        super().__init__()
+        super(Background, self).__init__()
+        # self.bgY = 0
+        # self.bgX = 0
+        self.pos  = vec(0,0)
         if name is None:
             self.image = pg.image.load(curr_path+"background.png")
         else:
             self.image = pg.image.load(curr_path+name)
         self.image = resize_img(self.image,cX=screen_width)
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=(int(screen_width/2),int(screen_height/2)))
+        self.mask = pg.mask.from_surface(self.image)
         print(self.rect.size)
-        self.bgY = 0
-        self.bgX = 0
+
  
     def update(self,screen):
-        screen.blit(self.image, (self.bgX, self.bgY))
+        screen.blit(self.image, (self.pos.x, self.pos.y))
         
         
 def resize_img(image,cX = None, cY =None):
@@ -346,7 +415,9 @@ class Game:
         
         self.level = "level_1"
         
-        
+        for k,v in game_levels.items():
+            v.mov_entities.append(self.player.entity)
+            print()
         self.enemies = pg.sprite.Group(Enemy((320, 240)))
         # self.all_sprites = pg.sprite.Group(self.player.entity, self.enemies)
         self.done = False
@@ -371,9 +442,7 @@ class Game:
             #     self.player.entity.rect.center = event.pos
 
     def update(self):
-        # Check if the player collides with an enemy sprite. The
-        # `pygame.sprite.collide_mask` callback uses the `mask`
-        # attributes of the sprites for the collision detection.
+
 
         
         

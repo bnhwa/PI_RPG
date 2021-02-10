@@ -1,0 +1,6 @@
+moving_entity=1
+hp=2
+velocity=2
+attack=normal
+range=1
+sprite_screen_ratio=10
