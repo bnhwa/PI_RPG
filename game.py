@@ -239,17 +239,23 @@ class moving_entity(Entity):
             self.vel += self.acc
             self.pos += self.vel + 0.5 * self.acc  #
             self.rect.midbottom = self.pos
-       
-       
+    
     def stop(self):
-        self.vel.x=0
-        self.acc.x=0
+       self.vel.x=0
+       self.acc.x=0
+    
+    def draw_hp_bar(self,screen):
+        pass
+        pg.draw.rect(screen, (255,0,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0], 10)) 
+        pg.draw.rect(screen, (0,128,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0] - (5 * (self.max_hp - self.hp)), 10))
         
     def update(self,screen):
-        #self.state
-        #self.image = 
-        # self.move()
-
+        """
+        update moving entity
+        """
+        #draw hp bar
+        self.draw_hp_bar(screen)
+        
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc  #
