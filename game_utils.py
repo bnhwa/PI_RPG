@@ -41,6 +41,11 @@ def t_convert(item):
         return float(item)
     else:#string
         return item
+####################
+# serial utils
+####################
+def get_bit(num,pos):
+    return num >> pos & 1
 if __name__ == '__main__':
     # pg.init()
     # game = Game()

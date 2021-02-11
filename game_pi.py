@@ -13,8 +13,23 @@ import pygame as pg
 import os
 import sys
 import game_utils as ut
-import copy
+
+import serial
+
 ##globals
+SERIAL_PORT = "COM3"
+USE_ESP = 1
+CONTROL_VAL = 128
+port = "COM3"
+baudrate = 9600
+currVal = 128
+ser = serial.Serial(port,baudrate,timeout=0.0001)
+
+# CONTROL_VAL = multiprocess.Value('i',0)
+#
+
+
+#GAME
 glob_player = None
 #player characters
 game_entities = {}
@@ -60,6 +75,7 @@ class Entity(pg.sprite.Sprite):
             attr_fl = open(curr_path+"attributes.txt", "r")
             attr_list = list(map(lambda x: [x[0],ut.t_convert(x[1])], [i.split("=") for i in attr_fl.read().replace(' ', "")\
                             .split("\n") if i.strip() != ""]))
+            if verbose: print(content_list)
             
             attr_fl.close()
             for a,v in attr_list:
@@ -247,6 +263,7 @@ class moving_entity(Entity):
             self.rect.midbottom = self.pos
 
     def move(self):
+        global FRIC
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc  #
@@ -327,21 +344,42 @@ class Player(object):
         self.entity.update(screen)
         self.entity.stop()
         pressed_keys = pg.key.get_pressed()
-        if self.entity.hp>0: 
-            if pressed_keys[pg.K_LEFT]:
-    
-                self.entity.acc.x = -self.entity.accel
-            if pressed_keys[pg.K_RIGHT]:
-                self.entity.acc.x = self.entity.accel#ACC 
-                
-            # if pressed_keys[pg.K_DOWN]:
-            #     self.state="crouch"
-            if pressed_keys[pg.K_SPACE]:
-                self.entity.jump()
-                
-            if pressed_keys[pg.K_a]:
-                self.attacks.append(self.entity.do_attack())
-                
+        if USE_ESP:
+            
+            left_right = ut.get_bit(CONTROL_VAL,0)
+            lr_move = ut.get_bit(CONTROL_VAL,1)
+            up_down = ut.get_bit(CONTROL_VAL,2)
+            ud_move = ut.get_bit(CONTROL_VAL,3)
+            
+            # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
+            if self.entity.hp>0: 
+                if lr_move:
+                    if not left_right:
+                        self.entity.acc.x = -self.entity.accel
+                    else:
+                        self.entity.acc.x = self.entity.accel#ACC 
+                if ud_move:
+                    if not up_down:
+                        self.entity.jump()
+                    
+                if pressed_keys[pg.K_a]:
+                    self.attacks.append(self.entity.do_attack())
+        else:
+            if self.entity.hp>0: 
+                if pressed_keys[pg.K_LEFT]:
+        
+                    self.entity.acc.x = -self.entity.accel
+                if pressed_keys[pg.K_RIGHT]:
+                    self.entity.acc.x = self.entity.accel#ACC 
+                    
+                # if pressed_keys[pg.K_DOWN]:
+                #     self.state="crouch"
+                if pressed_keys[pg.K_SPACE]:
+                    self.entity.jump()
+                    
+                if pressed_keys[pg.K_a]:
+                    self.attacks.append(self.entity.do_attack())
+        
         #deal with attack objects   
         for a in self.attacks:
             if a.entity.hp<=0 or a.dead:
@@ -430,12 +468,14 @@ class Level(object):
         
         
     def load_entities(self, reset = False):
+        global glob_player
         #load entities, set each to alive
         attr_fl = open(self.curr_path+"placement.txt", "r")
         attr_list = list(map(lambda x: [x[0],           list(map(lambda y: ut.t_convert(y),x[1].strip().split(",")) )],\
                     [i.split("=") for i in attr_fl.read().replace(' ', "")\
                         .split("\n") if i.strip() != ""]))
         attr_fl.close()
+        print(glob_player)
         if not reset:
             for k,v in attr_list:
                 if k == "player":
@@ -574,6 +614,7 @@ def resize_img(image,cX = None, cY =None):
 
 class Game:
     def __init__(self):
+        global glob_player, game_levels
         self.screen = pg.display.set_mode((screen_width, screen_height))
         self.player =  glob_player
         self.game_state=1
@@ -610,6 +651,8 @@ class Game:
         # self.resetting = False
         
     def event_loop(self):
+        if USE_ESP:
+            get_serial()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.done = True
@@ -625,7 +668,7 @@ class Game:
         pass
 
 def load_entities(verbose = False):
-    global game_entities
+    global game_entities, game_enemies, game_attacks
     char_dir = "\\bin\\characters"
 
     #characters
@@ -673,16 +716,35 @@ def load_levels(verbose = False):
         # print(os.listdir(ok))
         game_levels[i] = Level(i,curr_path+i+"\\")
     pass
+################################################################
+#serial
+################################################################
+
+    
+def get_serial():
+    global CONTROL_VAL
+    data = ser.read(1)
+    data+= ser.read(ser.inWaiting())
+    if len(data) == 5:
+        CONTROL_VAL = int(data[:3])
 
 
-if __name__ == '__main__':
-    #load entities
-    load_entities()
-    glob_player=Player('jeanne')
-    load_levels()
+            
+def run_game():
+
     #load levels
     pg.init()
     game = Game()
     game.run()
     pg.quit()
+if __name__ == '__main__':
+
+    __spec__ = "ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>)"
+    load_entities()
+    glob_player=Player('jeanne')
+    load_levels()
+    get_serial()
+    run_game()
+
+    
     # print(os.listdir(os.getcwd()+"\\bin\\characters"))
