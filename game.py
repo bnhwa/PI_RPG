@@ -15,6 +15,7 @@ import sys
 import game_utils as ut
 import copy
 ##globals
+glob_player = None
 game_entities = {}
 game_levels = {}
 game_attacks = {}
@@ -183,12 +184,13 @@ class moving_entity(Entity):
 
         self.hp=self.max_hp
         
+    def set_pos(self,posX,posY):
+        self.pos = vec(posX,posY)
+    
     def attack(self):
         pass
     
     def jump(self):
-        # print("oppai")
-        self.hp = 0
         # If touching the ground, and not currently jumping, cause the player to jump.
         if self.onGround and not self.jumping:
             self.state="jumping"
@@ -257,14 +259,13 @@ class Player(object):
             self.entity = copy.copy(game_entities[entity])
             
         # super(Player1, self).__init__(name,curr_path)
-    def update(self,screen):
+    def update(self):#screen
         
         # print(self.entity.pos)
         
-        self.entity.update(screen)
-        pressed_keys = pg.key.get_pressed()
-        self.state = "idle"
+        # self.entity.update(screen)
         self.entity.stop()
+        pressed_keys = pg.key.get_pressed()
         if self.entity.hp>0: 
             if pressed_keys[pg.K_LEFT]:
     
@@ -330,16 +331,28 @@ class Level(object):
         self.terrain =Background(curr_path,name = "terrain.png")
         self.collidebg=pg.sprite.Group(self.terrain)
         self.mov_entities = []
+        self.load_entities(curr_path)
+        self.screen = None
         
         
-    def load_entities(self):
+    def load_entities(self,curr_path):
         #load entities, set each to alive
-        attr_fl = open(curr_path+"attributes.txt", "r")
-        attr_list = list(map(lambda x: [x[0],ut.t_convert(x[1])], [i.split("=") for i in attr_fl.read().replace(' ', "")\
+        attr_fl = open(curr_path+"placement.txt", "r")
+        attr_list = list(map(lambda x: [x[0],           list(map(lambda y: ut.t_convert(y),x[1].strip().split(",")) )],\
+                    [i.split("=") for i in attr_fl.read().replace(' ', "")\
                         .split("\n") if i.strip() != ""]))
-        # if verbose: print(content_list)
-        
         attr_fl.close()
+        for k,v in attr_list:
+            if k == "player":
+                glob_player.entity.set_pos(v[0],v[1])
+                self.mov_entities.append(glob_player.entity)
+            else:
+                tmp = copy.copy(game_entities[k])
+                tmp.set_pos(v[0],v[1])
+                self.mov_entities.append(tmp)
+            
+            print(attr_list)
+
         # for a,v in attr_list:
         #     setattr(self,a,v)
         
@@ -347,9 +360,11 @@ class Level(object):
     def reset(self):
         #reset entities and their positions
         pass
-    def update(self,screen):
-        self.bg.update(screen)
-        self.terrain.update(screen)
+    def update(self):
+        self.bg.update(self.screen)
+        self.terrain.update(self.screen)
+        #player
+        self.player.update()
         ###########################
         # Collision Checking
         ###########################
@@ -359,6 +374,7 @@ class Level(object):
         for m in self.mov_entities:
             m.acc.y=+3;
             self.terrain_check(m)
+            m.update(self.screen)
         #--------------------------
         # entity - entity collision
         #--------------------------
@@ -446,12 +462,14 @@ def resize_img(image,cX = None, cY =None):
 class Game:
     def __init__(self):
         self.screen = pg.display.set_mode((screen_width, screen_height))
-        self.player =  Player('jeanne')
+        self.player =  glob_player
         self.game_state=1
         self.level = "level_1"
         
         for k,v in game_levels.items():
-            v.mov_entities.append(self.player.entity)
+            v.player= self.player
+            v.screen = self.screen
+            # v.mov_entities.append(self.player.entity)
             print()
         self.enemies = pg.sprite.Group(Enemy((320, 240)))
         # self.all_sprites = pg.sprite.Group(self.player.entity, self.enemies)
@@ -464,10 +482,9 @@ class Game:
             
             
             
-            game_levels[self.level].update(self.screen)
+            game_levels[self.level].update()
             self.update()
 
-            self.player.update(self.screen)
             pg.display.flip()
             #set fps pi 30 fps bc its a potato
             self.clock.tick(30)
@@ -540,6 +557,7 @@ def load_levels(verbose = False):
 if __name__ == '__main__':
     #load entities
     load_entities()
+    glob_player=Player('jeanne')
     load_levels()
     #load levels
     pg.init()
