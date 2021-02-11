@@ -40,21 +40,8 @@ COUNT = 0
 
 class Entity(pg.sprite.Sprite):
     
-    def __init__(self, name, curr_path,scale = None,verbose = False):
+    def __init__(self, name, curr_path,scale = None,verbose = False,copy_vals = None):
         super(Entity, self).__init__()
-        ######################
-        # entity attributes
-        ######################
-        
-        attr_fl = open(curr_path+"attributes.txt", "r")
-        attr_list = list(map(lambda x: [x[0],ut.t_convert(x[1])], [i.split("=") for i in attr_fl.read().replace(' ', "")\
-                        .split("\n") if i.strip() != ""]))
-        if verbose: print(content_list)
-        
-        attr_fl.close()
-        for a,v in attr_list:
-            setattr(self,a,v)
-            
         ######################
         #game attributes
         ######################
@@ -64,26 +51,45 @@ class Entity(pg.sprite.Sprite):
         self.crouching = False
         self.move_frame = 0
         ######################
-        #animations
+        # entity attributes
         ######################
-        self.state_dict = {}
-        # {        run:{left:[], right:[]}    }
-        self.state_frames = {}
-        self.state_inc = {}
-        #run right or left same frames
-        # run: 10 e.t.c.
-        
-        self.name = name
-        self.image = pg.image.load(curr_path+"base.png")
-        self.image = self.resize_img(self.image)
-        self.rect = self.image.get_rect()
+        if copy_vals is None:
+            attr_fl = open(curr_path+"attributes.txt", "r")
+            attr_list = list(map(lambda x: [x[0],ut.t_convert(x[1])], [i.split("=") for i in attr_fl.read().replace(' ', "")\
+                            .split("\n") if i.strip() != ""]))
+            if verbose: print(content_list)
+            
+            attr_fl.close()
+            for a,v in attr_list:
+                setattr(self,a,v)
+                
+
+            ######################
+            #animations
+            ######################
+            # {        run:{left:[], right:[]}    }
+            self.state_dict = {}
+            self.state_frames = {}
+            self.state_inc = {}
+            #run right or left same frames
+            # run: 10 e.t.c.
+            
+            self.name = name
+            self.image = pg.image.load(curr_path+"base.png")
+            self.image = self.resize_img(self.image)
+            self.rect = self.image.get_rect()
+            self.load_sprites(curr_path)
+        else:
+            self.state_dict = copy_vals["state_dict"]
+            self.state_frames = copy_vals["state_frames"]
+            self.state_inc = copy_vals["state_inc"]
+            self.name = copy_vals["name"]
+            self.image = copy_vals["image"]
+            self.rect = self.image.get_rect()
         # print(self.rect.size)
         
         
-        if verbose:
-            print(self.rect.size)
-            print(curr_path)
-            
+    def load_sprites(self,curr_path):            
         #load sprites
         dirs, poo = ut.get_dirs(curr_path+"sprites",prepended=True)
         # print(dirs)
@@ -167,19 +173,52 @@ class Entity(pg.sprite.Sprite):
 
 class moving_entity(Entity):
     
-    def __init__(self, name,curr_path,scale = None,verbose = False):
-        super(moving_entity, self).__init__(name,curr_path,scale = None,verbose = False)
-        # Position and direction
+    def __init__(self, name,curr_path,scale = None,verbose = False,copy_vals = None):
+        
+        #positino & direction
         self.vx = 0
-        self.pos = vec((340, 240))
+        self.pos = vec((0, 0))
         self.vel = vec(0,0)
         self.acc = vec(0,0)
         self.direction = "right"
         self.state = "idle"
-        ##########
-        self.hp = self.max_hp
 
+        ###
+        self.accel=0
+        self.velocity=0
+        self.attack=0
+        self.range=0
         
+        if  copy_vals is None:
+            super(moving_entity, self).__init__(name,curr_path,scale = None,verbose = False)
+            print(self.max_hp)
+            # print("asdfasdfadfsaf")
+            self.hp = self.max_hp
+        else:
+            super(moving_entity, self).__init__(None,None,copy_vals=copy_vals)
+            self.hp=0
+            self.max_hp = 0
+
+    def copy(self):
+        copy_vals = {
+            "state_dict":self.state_dict,
+            "state_frames":self.state_frames,
+            "state_inc":self.state_inc,
+            "name":self.name,
+            "image":self.image
+        }
+        ret = moving_entity(None,None,copy_vals=copy_vals)
+        
+        ret.accel=self.accel
+        ret.velocity=self.velocity
+        ret.attack=self.attack
+        ret.range=self.range
+        ret.max_hp = self.max_hp
+        ret.hp = ret.max_hp
+
+        return ret
+        
+
     def reset(self):
 
         self.hp=self.max_hp
@@ -256,7 +295,7 @@ class Player(object):
         #make list of entities
         global game_entities
         if entity in game_entities.keys():
-            self.entity = copy.copy(game_entities[entity])
+            self.entity = game_entities[entity].copy()#copy.copy(game_entities[entity])
             
         # super(Player1, self).__init__(name,curr_path)
     def update(self):#screen
@@ -347,11 +386,11 @@ class Level(object):
                 glob_player.entity.set_pos(v[0],v[1])
                 self.mov_entities.append(glob_player.entity)
             else:
-                tmp = copy.copy(game_entities[k])
+                tmp = game_entities[k].copy()
                 tmp.set_pos(v[0],v[1])
                 self.mov_entities.append(tmp)
             
-            print(attr_list)
+            # print(attr_list)
 
         # for a,v in attr_list:
         #     setattr(self,a,v)
