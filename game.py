@@ -17,6 +17,7 @@ import copy
 ##globals
 glob_player = None
 game_entities = {}
+game_enemies = {}
 game_levels = {}
 game_attacks = {}
 #screenx screeny
@@ -248,7 +249,7 @@ class moving_entity(Entity):
     def draw_hp_bar(self,screen):
         #perhaps add name or other attributes
         pg.draw.rect(screen, (255,0,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0], 10)) 
-        pg.draw.rect(screen, (0,128,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0]*(5 * (self.hp/self.max_hp)), 10))
+        pg.draw.rect(screen, (0,128,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0]*(self.hp/self.max_hp), 10))
         
     def update(self,screen):
         """
@@ -297,19 +298,15 @@ class moving_entity(Entity):
 
 
 class Player(object):
-    def __init__(self,entity):
+    def __init__(self,entity, level = None):
         
         #make list of entities
         global game_entities
         if entity in game_entities.keys():
-            self.entity = game_entities[entity].copy()#copy.copy(game_entities[entity])
+            self.entity = game_entities[entity].copy()
             
-        # super(Player1, self).__init__(name,curr_path)
-    def update(self):#screen
-        
-        # print(self.entity.pos)
-        
-        # self.entity.update(screen)
+    def update(self,screen):#screen
+        self.entity.update(screen)
         self.entity.stop()
         pressed_keys = pg.key.get_pressed()
         if self.entity.hp>0: 
@@ -341,16 +338,20 @@ class Attacks(Entity):
     """
     
     def __init__(self, name,curr_path,scale = None):
-        super(Player1, self).__init__(name,curr_path)
+        super(Player, self).__init__(name,curr_path)
         
         #attributes.txt
         
         
 class Enemies(moving_entity):
-    def __init__(self,entity):    
+    def __init__(self,entity,posX=0,posY=0):    
         #make list of entities
-        global game_entities 
-    def update(self):
+        self.entity = game_enemies[entity].copy()
+        self.entity.set_pos(posX,posY)
+    def update(self,screen):
+        
+        self.entity.stop()
+        self.entity.update(screen)
         #depending on attack strategy, employ different one
         pass
 
@@ -391,16 +392,13 @@ class Level(object):
         for k,v in attr_list:
             if k == "player":
                 glob_player.entity.set_pos(v[0],v[1])
-                self.mov_entities.append(glob_player.entity)
+                self.mov_entities.append(glob_player)
             else:
-                tmp = game_entities[k].copy()
-                tmp.set_pos(v[0],v[1])
-                self.mov_entities.append(tmp)
+                
+                
+                self.mov_entities.append(Enemies(k,posX=v[0],posY=v[1]))
             
-            # print(attr_list)
 
-        # for a,v in attr_list:
-        #     setattr(self,a,v)
         
     
     def reset(self):
@@ -410,7 +408,9 @@ class Level(object):
         self.bg.update(self.screen)
         self.terrain.update(self.screen)
         #player
-        self.player.update()
+        
+        
+        # self.player.update()
         ###########################
         # Collision Checking
         ###########################
@@ -418,8 +418,9 @@ class Level(object):
         #apply gravity and terrain check
         #--------------------------
         for m in self.mov_entities:
-            m.acc.y=+3;
-            self.terrain_check(m)
+            m.entity.acc.y=+3;
+            # m.acc.y=+3;
+            self.terrain_check(m.entity)
             m.update(self.screen)
         #--------------------------
         # entity - entity collision
@@ -572,7 +573,7 @@ def load_entities(verbose = False):
         print(ok)
         # print(os.listdir(ok))
         game_entities[i] = moving_entity(i,curr_path+i+"\\")
-
+    #enemies
     dirs, curr_path = ut.get_dirs("\\bin\\enemies")
     for i in dirs:
         if verbose :
@@ -580,7 +581,7 @@ def load_entities(verbose = False):
         ok = curr_path+i+"\\"
         print(ok)
         # print(os.listdir(ok))
-        game_entities[i] = moving_entity(i,curr_path+i+"\\")
+        game_enemies[i] = moving_entity(i,curr_path+i+"\\")
     #levels
     
     
