@@ -1,7 +1,8 @@
 moving_entity=1
-max_hp=10
-accel=5
+max_hp=5
+accel=1
 velocity=5
-attack=normal
+attack=staff
 range=5
+damage = 0.25
 sprite_screen_ratio=10
