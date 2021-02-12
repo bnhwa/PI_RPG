@@ -5,10 +5,12 @@ much more efficient than sending strings!
 int xyzPins[] = {13, 12, 14};   //x,y,z pins
 #define pin_button1 18
 #define pin_button2 19
+#define pin_button3 15
 void setup() {
   Serial.begin(9600);//115200
   pinMode(pin_button1,INPUT);
   pinMode(pin_button2,INPUT);
+  pinMode(pin_button3,INPUT);
   pinMode(xyzPins[2], INPUT_PULLUP);  //z axis is a button.
 }
 
@@ -33,8 +35,15 @@ void loop() {
   }else{
     b2 = 0;
   }
+  byte b3 = 1;
+  if(digitalRead(pin_button3)==LOW){
+    b3 = 1;
+  }else{
+    b3 = 0;
+  }
   bitWrite(send_out, 4, b1);
   bitWrite(send_out, 5, b2);
+  bitWrite(send_out,6,b3);
   Serial.println(send_out);
 //  Serial.println(send_out);
 //  Serial.println(moving(yVal));
