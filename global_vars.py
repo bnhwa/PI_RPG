@@ -26,5 +26,5 @@ print(screen_width,screen_height)
 ##
 vec = pg.math.Vector2
 FRIC = -0.10
-FPS =60
+FPS =20
 USE_ESP=1
