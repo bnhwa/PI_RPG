@@ -72,7 +72,7 @@ class Entity(pg.sprite.Sprite):
         # print(dirs)
         if hasattr(self, "moving_entity"):
             for spr in dirs:
-                fls, pth =  ut.get_files(curr_path+"sprites"+"\\"+spr,".png" ,prepended=True)
+                fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
                 self.state_inc[spr]=float(60/len(fls))/20
@@ -82,7 +82,7 @@ class Entity(pg.sprite.Sprite):
                     -1 : [],#left=-1
                     'base' : []
                     }
-                resizing = curr_path+"sprites"+"\\"+spr+"\\sizing.txt"
+                resizing = curr_path+"sprites"+"/"+spr+"/sizing.txt"
                 # print(resizing)
                 resizeX = None
                 if os.path.exists(resizing):
@@ -102,7 +102,7 @@ class Entity(pg.sprite.Sprite):
                     self.state_dict[spr][-1].append(img_left)#left
         else:
             for spr in dirs:
-                fls, pth =  ut.get_files(curr_path+"sprites"+"\\"+spr,".png" ,prepended=True)
+                fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
                 self.state_dict[spr]={
