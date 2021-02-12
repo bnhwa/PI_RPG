@@ -3,8 +3,12 @@ sends bytes over to python, each byte position indicates somtheing
 much more efficient than sending strings!
 **********************************************************************/
 int xyzPins[] = {13, 12, 14};   //x,y,z pins
+#define pin_button1 18
+#define pin_button2 19
 void setup() {
   Serial.begin(9600);//115200
+  pinMode(pin_button1,INPUT);
+  pinMode(pin_button2,INPUT);
   pinMode(xyzPins[2], INPUT_PULLUP);  //z axis is a button.
 }
 
@@ -17,7 +21,22 @@ void loop() {
   int yVal = analogRead(xyzPins[1]);//y from top0 ---4096bottom
   int zVal = digitalRead(xyzPins[2]);
   byte send_out = set_direc(xVal,yVal);
+  byte b1 = 1;
+  if(digitalRead(pin_button1)==LOW){
+    b1 = 1;
+  }else{
+    b1 = 0;
+  }
+  byte b2 = 1;
+  if(digitalRead(pin_button2)==LOW){
+    b2 = 1;
+  }else{
+    b2 = 0;
+  }
+  bitWrite(send_out, 4, b1);
+  bitWrite(send_out, 5, b2);
   Serial.println(send_out);
+//  Serial.println(send_out);
 //  Serial.println(moving(yVal));
   //Serial.printf("X,Y,Z: %d,\t%d,\t%d\n", xVal, yVal, zVal);
   delay(500);

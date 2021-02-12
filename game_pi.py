@@ -23,6 +23,7 @@ CONTROL_VAL = 128
 port = "COM3"
 baudrate = 9600
 currVal = 128
+
 ser = serial.Serial(port,baudrate,timeout=0.0001)
 
 # CONTROL_VAL = multiprocess.Value('i',0)
@@ -47,7 +48,7 @@ print(screen_width,screen_height)
 ##
 vec = pg.math.Vector2
 FRIC = -0.10
-# FPS = 60
+FPS = 30
 #################################
 # Entities
 #################################
@@ -205,6 +206,7 @@ class moving_entity(Entity):
         self.attack=0
         self.range=0
         self.damage=0
+        self.cooldown = 0 #
         
         if  copy_vals is None:
             super(moving_entity, self).__init__(name,curr_path,scale = None,verbose = False)
@@ -231,6 +233,7 @@ class moving_entity(Entity):
         ret.attack=self.attack
         ret.range=self.range
         ret.max_hp = self.max_hp
+        ret.cooldown = self.cooldown
         ret.damage = self.damage
         ret.hp = ret.max_hp
 
@@ -244,11 +247,16 @@ class moving_entity(Entity):
     def set_pos(self,posX,posY):
         self.pos = vec(posX,posY)
     
-    def do_attack(self):
-        # pass
-        # print("htoo")
-        tmp_a = Attack(self,self.pos,game_attacks[self.attack].copy(),self.direction) 
-        return tmp_a
+    def do_attack(self,attack_in = None):
+        attack_in = attack_in if attack_in is not None else self.attack
+    
+        if self.cooldown <=0:
+            attack_ent = game_attacks[attack_in].copy()
+            self.cooldown+=(attack_ent.cooldown*FPS)
+            tmp_a = Attack(self,self.pos,game_attacks[attack_in].copy(),self.direction) 
+            return [tmp_a]
+        else:
+            return []
     
     def jump(self):
         # self.hp=0
@@ -263,7 +271,6 @@ class moving_entity(Entity):
             self.rect.midbottom = self.pos
 
     def move(self):
-        global FRIC
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc  #
@@ -331,7 +338,6 @@ class moving_entity(Entity):
             # self.state = "dead"
         screen.blit(self.image, self.rect)
         
-        
 class Player(object):
     def __init__(self,entity, level = None):
         self.attacks = []
@@ -343,6 +349,7 @@ class Player(object):
     def update(self,screen):#screen
         self.entity.update(screen)
         self.entity.stop()
+        self.entity.cooldown-=1
         pressed_keys = pg.key.get_pressed()
         if USE_ESP:
             
@@ -350,20 +357,22 @@ class Player(object):
             lr_move = ut.get_bit(CONTROL_VAL,1)
             up_down = ut.get_bit(CONTROL_VAL,2)
             ud_move = ut.get_bit(CONTROL_VAL,3)
-            
+            blue = ut.get_bit(CONTROL_VAL,4)
+            red = ut.get_bit(CONTROL_VAL,5)
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
             if self.entity.hp>0: 
                 if lr_move:
-                    if not left_right:
+                    if left_right:#not
                         self.entity.acc.x = -self.entity.accel
                     else:
                         self.entity.acc.x = self.entity.accel#ACC 
                 if ud_move:
-                    if not up_down:
+                    if  up_down:#not
                         self.entity.jump()
-                    
-                if pressed_keys[pg.K_a]:
-                    self.attacks.append(self.entity.do_attack())
+                if blue:
+                    self.attacks+=self.entity.do_attack("fireball")         
+                if red:
+                    self.attacks+=self.entity.do_attack()   
         else:
             if self.entity.hp>0: 
                 if pressed_keys[pg.K_LEFT]:
@@ -378,8 +387,9 @@ class Player(object):
                     self.entity.jump()
                     
                 if pressed_keys[pg.K_a]:
-                    self.attacks.append(self.entity.do_attack())
-        
+                    self.attacks+=self.entity.do_attack()    
+                if pressed_keys[pg.K_s]:
+                    self.attacks+=self.entity.do_attack("fireball")           
         #deal with attack objects   
         for a in self.attacks:
             if a.entity.hp<=0 or a.dead:
@@ -639,7 +649,7 @@ class Game:
 
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato
-            self.clock.tick(30)
+            self.clock.tick(FPS)
             
             
             

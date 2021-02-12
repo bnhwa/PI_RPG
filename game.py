@@ -32,7 +32,7 @@ print(screen_width,screen_height)
 ##
 vec = pg.math.Vector2
 FRIC = -0.10
-# FPS = 60
+FPS = 30
 #################################
 # Entities
 #################################
@@ -189,6 +189,7 @@ class moving_entity(Entity):
         self.attack=0
         self.range=0
         self.damage=0
+        self.cooldown = 0 #
         
         if  copy_vals is None:
             super(moving_entity, self).__init__(name,curr_path,scale = None,verbose = False)
@@ -215,6 +216,7 @@ class moving_entity(Entity):
         ret.attack=self.attack
         ret.range=self.range
         ret.max_hp = self.max_hp
+        ret.cooldown = self.cooldown
         ret.damage = self.damage
         ret.hp = ret.max_hp
 
@@ -228,11 +230,16 @@ class moving_entity(Entity):
     def set_pos(self,posX,posY):
         self.pos = vec(posX,posY)
     
-    def do_attack(self):
-        # pass
-        # print("htoo")
-        tmp_a = Attack(self,self.pos,game_attacks[self.attack].copy(),self.direction) 
-        return tmp_a
+    def do_attack(self,attack_in = None):
+        attack_in = attack_in if attack_in is not None else self.attack
+    
+        if self.cooldown <=0:
+            attack_ent = game_attacks[attack_in].copy()
+            self.cooldown+=(attack_ent.cooldown*FPS)
+            tmp_a = Attack(self,self.pos,game_attacks[attack_in].copy(),self.direction) 
+            return [tmp_a]
+        else:
+            return []
     
     def jump(self):
         # self.hp=0
@@ -340,15 +347,16 @@ class Player(object):
                 self.entity.jump()
                 
             if pressed_keys[pg.K_a]:
-                self.attacks.append(self.entity.do_attack())
-                
+                self.attacks+=self.entity.do_attack()
+            if pressed_keys[pg.K_s]:
+                self.attacks+=self.entity.do_attack("fireball")                
         #deal with attack objects   
+        self.entity.cooldown-=1
         for a in self.attacks:
             if a.entity.hp<=0 or a.dead:
                 self.attacks.remove(a)
             else:
                 a.update(screen)
-        
         # if pressed_keys[pg.K_r]:
         #     self.entity.reset()
                 
@@ -598,7 +606,7 @@ class Game:
 
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato
-            self.clock.tick(30)
+            self.clock.tick(FPS)
             
             
             
