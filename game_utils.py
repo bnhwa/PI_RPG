@@ -12,10 +12,10 @@ import sys
 def get_dirs(str_in,prepended = False):
 
     if prepended:
-        return [name for name in os.listdir(str_in+"\\") if os.path.isdir(str_in+"\\"+name)],str_in
+        return [name for name in os.listdir(str_in+"/") if os.path.isdir(str_in+"/"+name)],str_in
     else:
-        dj = os.getcwd()+str_in+"\\"
-        return [name for name in os.listdir(os.getcwd()+str_in+"\\") if os.path.isdir(dj+name)],dj
+        dj = os.getcwd()+str_in+"/"
+        return [name for name in os.listdir(os.getcwd()+str_in+"/") if os.path.isdir(dj+name)],dj
     
 def get_files(str_in,ext, prepended = False, append = False):
     
@@ -23,12 +23,12 @@ def get_files(str_in,ext, prepended = False, append = False):
     ret = []
     retDir =""
     if prepended:
-        ret,retDir =  [name for name in os.listdir(str_in+"\\") if os.path.isfile(str_in+"\\"+name) and ext in name],str_in+"\\"
+        ret,retDir =  [name for name in os.listdir(str_in+"/") if os.path.isfile(str_in+"/"+name) and ext in name],str_in+"/"
     else:
-        dj = os.getcwd()+str_in+"\\"
-        ret,retDir =  [name for name in os.listdir(os.getcwd()+str_in+"\\") if os.path.isdir(dj+name) and ext in name],dj
+        dj = os.getcwd()+str_in+"/"
+        ret,retDir =  [name for name in os.listdir(os.getcwd()+str_in+"/") if os.path.isdir(dj+name) and ext in name],dj
     if append:
-        ret = [dj+"\\"+r for r in ret]
+        ret = [dj+"/"+r for r in ret]
     return ret,retDir
 
 ####################

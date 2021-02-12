@@ -289,52 +289,52 @@ class Game:
 
 def load_entities(verbose = False):
     global game_entities
-    char_dir = "\\bin\\characters"
+    char_dir = "/bin/characters"
 
     #characters
-    dirs, curr_path = ut.get_dirs("\\bin\\characters")
+    dirs, curr_path = ut.get_dirs("/bin/characters")
     for i in dirs:
         if verbose :
             print(i)
-        ok = curr_path+i+"\\"
+        ok = curr_path+i+"/"
         print(ok)
         # print(os.listdir(ok))
-        game_entities[i] = moving_entity(i,curr_path+i+"\\")
+        game_entities[i] = moving_entity(i,curr_path+i+"/")
         #if you want to fight your own characters
-        game_enemies[i] = moving_entity(i,curr_path+i+"\\")
+        game_enemies[i] = moving_entity(i,curr_path+i+"/")
     #enemies
-    dirs, curr_path = ut.get_dirs("\\bin\\enemies")
+    dirs, curr_path = ut.get_dirs("/bin/enemies")
     for i in dirs:
         if verbose :
             print(i)
-        ok = curr_path+i+"\\"
+        ok = curr_path+i+"/"
         print(ok)
         # print(os.listdir(ok))
-        game_enemies[i] = moving_entity(i,curr_path+i+"\\")
-    dirs, curr_path = ut.get_dirs("\\bin\\attacks")
+        game_enemies[i] = moving_entity(i,curr_path+i+"/")
+    dirs, curr_path = ut.get_dirs("/bin/attacks")
     for i in dirs:
         if verbose :
             print(i)
-        ok = curr_path+i+"\\"
+        ok = curr_path+i+"/"
         print(ok)
         # print(os.listdir(ok))
-        game_attacks[i] = moving_entity(i,curr_path+i+"\\")
+        game_attacks[i] = moving_entity(i,curr_path+i+"/")
     #levels
     
     
 def load_levels(verbose = False):
     global game_levels
-    char_dir = "\\bin\\levels"
+    char_dir = "/bin/levels"
 
     #characters
-    dirs, curr_path = ut.get_dirs("\\bin\\levels")
+    dirs, curr_path = ut.get_dirs("/bin/levels")
     for i in dirs:
         if verbose :
             print(i)
-        ok = curr_path+i+"\\"
+        ok = curr_path+i+"/"
         print(ok)
         # print(os.listdir(ok))
-        game_levels[i] = Level(i,curr_path+i+"\\")
+        game_levels[i] = Level(i,curr_path+i+"/")
     pass
 
 
