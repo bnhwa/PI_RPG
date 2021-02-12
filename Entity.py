@@ -248,8 +248,9 @@ class moving_entity(Entity):
 
     def draw_hp_bar(self,screen):
         #perhaps add name or other attributes
-        pg.draw.rect(screen, (255,0,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0], 10)) 
-        pg.draw.rect(screen, (0,128,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0]*(self.hp/self.max_hp), 10))
+        if self.hp >0:
+            pg.draw.rect(screen, (255,0,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0], 10)) 
+            pg.draw.rect(screen, (0,128,0), (self.rect.topleft[0], self.rect.topleft[1] , self.rect.size[0]*(self.hp/self.max_hp), 10))
         
     def update(self,screen):
         """
