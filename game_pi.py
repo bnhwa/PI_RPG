@@ -20,14 +20,15 @@ from Entity import Entity,moving_entity
 import serial
 
 ##globals
-SERIAL_PORT = "COM3"
+fl_ = open("settings.txt","r")
+SERIAL_PORT = asdf.read().strip()
+fl_.close()
 USE_ESP = 1
 CONTROL_VAL = 128
-port = "COM3"
 baudrate = 9600
 currVal = 128
 
-ser = serial.Serial(port,baudrate,timeout=0.0001)
+ser = serial.Serial(SERIAL_PORT,baudrate,timeout=0.0001)
 
         
 class Player(object):
