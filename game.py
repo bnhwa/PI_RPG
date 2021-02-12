@@ -144,7 +144,8 @@ class Level(object):
         for m in self.mov_entities:
             if m.entity.state != "dead":
                 m.entity.acc.y=+3;
-                self.terrain_check(m.entity)
+                # self.terrain_check(m.entity)
+                self.basic_check(m.entity)
             m.update(self.screen)
         #--------------------------
         #attack collision: Player attacks to enemies
@@ -194,7 +195,16 @@ class Level(object):
                 moving_ent.vel.y = 0
                 moving_ent.acc.y = 0
                 moving_ent.jumping = False
-
+                
+    def basic_check(self,moving_ent):
+        if moving_ent.pos.y >= screen_height-50: 
+            moving_ent.vel.y = 0
+            moving_ent.acc.y = 0
+            moving_ent.jumping = False
+            moving_ent.pos.y=screen_height-50
+            moving_ent.onGround = True
+            if moving_ent.hp<=0: moving_ent.state = "dead"
+            
     def collision_entities(self):
         #collide one by one
         # pg.sprite.spritecollide(self.player.entity, self.enemies, False, pg.sprite.collide_mask)
