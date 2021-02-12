@@ -30,6 +30,7 @@ class Player(object):
         self.entity.update(screen)
         self.entity.stop()
         pressed_keys = pg.key.get_pressed()
+
         if self.entity.hp>0: 
             if pressed_keys[pg.K_LEFT]:
     
@@ -37,16 +38,20 @@ class Player(object):
             if pressed_keys[pg.K_RIGHT]:
                 self.entity.acc.x = self.entity.accel#ACC 
                 
-            # if pressed_keys[pg.K_DOWN]:
-            #     self.state="crouch"
+            if pressed_keys[pg.K_DOWN]:#and self.entity.onGround:
+                self.entity.crouch()
+        
             if pressed_keys[pg.K_SPACE]:
                 self.entity.jump()
                 
             if pressed_keys[pg.K_a]:
                 self.attacks+=self.entity.do_attack()
             if pressed_keys[pg.K_s]:
-                self.attacks+=self.entity.do_attack("fireball")                
-        #deal with attack objects   
+                self.attacks+=self.entity.do_attack("fireball")
+            # if pressed_keys[pg.K_s]:
+            # self.attacks+=self.entity.do_attack("fireball")   
+        #deal with attack objects
+        
         self.entity.cooldown-=1
         for a in self.attacks:
             if a.entity.hp<=0 or a.dead:
@@ -135,10 +140,11 @@ class Level(object):
         #--------------------------
         #apply gravity and terrain check
         #--------------------------
+        
         for m in self.mov_entities:
-            m.entity.acc.y=+3;
-            # m.acc.y=+3;
-            self.terrain_check(m.entity)
+            if m.entity.state != "dead":
+                m.entity.acc.y=+3;
+                self.terrain_check(m.entity)
             m.update(self.screen)
         #--------------------------
         #attack collision: Player attacks to enemies
@@ -168,6 +174,7 @@ class Level(object):
             moving_ent.acc.y = 0
             moving_ent.jumping = False
             moving_ent.onGround = True
+            if moving_ent.hp<=0: moving_ent.state = "dead"
             # moving_ent.pos.y+=5
         else:
             moving_ent.onGround = False

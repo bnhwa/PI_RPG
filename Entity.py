@@ -65,12 +65,25 @@ class Entity(pg.sprite.Sprite):
             self.rect = self.image.get_rect()
         # print(self.rect.size)
         
+    def rep_sprite(self,orig,new):
+
+        self.state_dict[new]={
+                    1: [],#right=1
+                    -1 : [],#left=-1
+                    }
+        self.state_dict[new][1]=self.state_dict[orig][1]
+        self.state_dict[new][-1]=self.state_dict[orig][-1]
+        self.state_frames[new]=self.state_frames[orig]
+        self.state_inc[new]=self.state_inc[orig]
+        # print(len(self.state_dict[new][1]))
+        # print(len(self.state_dict[orig][1]))
         
     def load_sprites(self,curr_path):            
         #load sprites
         dirs, poo = ut.get_dirs(curr_path+"sprites",prepended=True)
         # print(dirs)
         if hasattr(self, "moving_entity"):
+            # print(dirs)
             for spr in dirs:
                 fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
                 
@@ -80,7 +93,6 @@ class Entity(pg.sprite.Sprite):
                 self.state_dict[spr]={
                     1: [],#right=1
                     -1 : [],#left=-1
-                    'base' : []
                     }
                 resizing = curr_path+"sprites"+"/"+spr+"/sizing.txt"
                 # print(resizing)
@@ -89,7 +101,7 @@ class Entity(pg.sprite.Sprite):
                     fl_tmp = open(resizing)
                     resizeX = ut.t_convert(fl_tmp.read())
                     fl_tmp.close()
-                    
+                
                 for f in fls:
                     #default sprites are oriented to the left
                     img_left = pg.image.load(pth+f)
@@ -100,6 +112,14 @@ class Entity(pg.sprite.Sprite):
                     img_right = pg.transform.flip(img_left, True, False)
                     self.state_dict[spr][1].append(img_right)#right
                     self.state_dict[spr][-1].append(img_left)#left
+            if 'dying' not in dirs:
+                self.rep_sprite('dead','dying')
+            if 'crouch' not in dirs:
+                self.rep_sprite('idle','crouch')
+            # for i in ['jumping','run']:
+            #     if i not in dirs:
+            #         self.rep_sprite('idle',i)
+
         else:
             for spr in dirs:
                 fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
@@ -166,6 +186,8 @@ class moving_entity(Entity):
         self.range=0
         self.damage=0
         self.cooldown = 0 #
+        ###
+        self.dead = False
         
         if  copy_vals is None:
             super(moving_entity, self).__init__(name,curr_path,scale = None,verbose = False)
@@ -200,7 +222,8 @@ class moving_entity(Entity):
         
 
     def reset(self):
-
+        self.dead = False
+        self.state = "idle"
         self.hp=self.max_hp
         
     def set_pos(self,posX,posY):
@@ -216,11 +239,15 @@ class moving_entity(Entity):
             return [tmp_a]
         else:
             return []
-    
+    def crouch(self):
+        if self.onGround and not self.crouching:
+            self.crouching = True
+            self.state = "crouch"
+            
     def jump(self):
         # self.hp=0
         # If touching the ground, and not currently jumping, cause the player to jump.
-        if self.onGround and not self.jumping:
+        if self.onGround and not self.jumping :#and not self.crouching:
             self.state="jumping"
             self.onGround = False
             self.jumping = True
@@ -242,8 +269,8 @@ class moving_entity(Entity):
         self.rect.midbottom = self.pos
         
     def stop(self):
-       self.vel.x=0
-       self.acc.x=0
+        self.vel.x=0
+        self.acc.x=0
     
 
     def draw_hp_bar(self,screen):
@@ -260,20 +287,24 @@ class moving_entity(Entity):
         self.draw_hp_bar(screen)
         self.move()
         self.update_sprite(screen)
-        
+    
         
         
 
     def update_sprite(self,screen):
         if self.hp>0:
+            #self.hp>0:
             if self.onGround:
-                if abs(self.vel.x) > 0.3:
-                    
-                    self.running = True
-                    self.state = "run"
+                if not self.crouching:
+                    if abs(self.vel.x) > 0.3:
+                        
+                        self.running = True
+                        self.state = "run"
+                    else:
+                        self.running = False
+                        self.state = "idle"
                 else:
-                    self.running = False
-                    self.state = "idle"
+                    self.crouching = False
                 
             # if self.jumping == False and self.running == True:  
             if self.vel.x > 0:
@@ -281,12 +312,11 @@ class moving_entity(Entity):
             elif self.vel.x < 0:
                 self.direction = -1#left=-1
                 
-            if self.state != "idle" and abs(self.vel.x) < 0.2 and self.move_frame != 0:
+            if (self.state not in  ["idle","crouch"] )and abs(self.vel.x) < 0.2 and self.move_frame != 0:
                 self.move_frame = 0
-        else:
-            self.state="dead"
-
-
+            self.crouching ==False
+        elif not self.dead:
+            self.state = "dying"
 
         self.move_frame += self.state_inc[self.state]
         

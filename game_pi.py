@@ -130,14 +130,12 @@ class Level(object):
         
         
     def load_entities(self, reset = False):
-        global glob_player
         #load entities, set each to alive
         attr_fl = open(self.curr_path+"placement.txt", "r")
         attr_list = list(map(lambda x: [x[0],           list(map(lambda y: ut.t_convert(y),x[1].strip().split(",")) )],\
                     [i.split("=") for i in attr_fl.read().replace(' ', "")\
                         .split("\n") if i.strip() != ""]))
         attr_fl.close()
-        print(glob_player)
         if not reset:
             for k,v in attr_list:
                 if k == "player":
@@ -174,10 +172,11 @@ class Level(object):
         #--------------------------
         #apply gravity and terrain check
         #--------------------------
+        
         for m in self.mov_entities:
-            m.entity.acc.y=+3;
-            # m.acc.y=+3;
-            self.terrain_check(m.entity)
+            if m.entity.state != "dead":
+                m.entity.acc.y=+3;
+                self.terrain_check(m.entity)
             m.update(self.screen)
         #--------------------------
         #attack collision: Player attacks to enemies
@@ -207,6 +206,7 @@ class Level(object):
             moving_ent.acc.y = 0
             moving_ent.jumping = False
             moving_ent.onGround = True
+            if moving_ent.hp<=0: moving_ent.state = "dead"
             # moving_ent.pos.y+=5
         else:
             moving_ent.onGround = False
