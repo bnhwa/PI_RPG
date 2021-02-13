@@ -6,6 +6,7 @@ Created on Tue Feb  9 13:00:04 2021
 """
 import os
 import sys
+import pygame as pg
 ####################
 # File utils
 ####################
@@ -52,3 +53,22 @@ if __name__ == '__main__':
     # game.run()
     # pg.quit()
     pass
+####################
+# pygame utils
+####################
+def resize_img(image,cX = None, cY =None):
+
+    oldx, oldy = image.get_rect().size
+    if cX is None and cY is None:
+        return image
+    elif cX is not None and cY is None:
+        ratio = (cX/oldx)
+        return pg.transform.scale(image, (int(oldx*ratio), int(oldy*ratio)))
+    elif cY is not None and cX is None:
+        ratio = (cY/oldy)
+        return pg.transform.scale(image, (int(oldx*ratio), int(oldy*ratio)))
+    else:
+        ratioX = (cX/oldx)
+        ratioY = (cY/oldy)
+        return pg.transform.scale(image, (int(oldx*ratioX), int(oldy*ratioY)))
+    return image   

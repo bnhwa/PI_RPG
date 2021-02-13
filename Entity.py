@@ -222,20 +222,22 @@ class moving_entity(Entity):
         
 
     def reset(self):
-        self.dead = False
+        self.dead == False
         self.state = "idle"
+        self.move_frame=0
         self.hp=self.max_hp
+        print("{} reset".format(self.name))
         
     def set_pos(self,posX,posY):
         self.pos = vec(posX,posY)
     
-    def do_attack(self,attack_in = None):
+    def do_attack(self,game,attack_in = None):
         attack_in = attack_in if attack_in is not None else self.attack
     
         if self.cooldown <=0:
-            attack_ent = game_attacks[attack_in].copy()
+            attack_ent = game.game_attacks[attack_in].copy()
             self.cooldown+=(attack_ent.cooldown*FPS)
-            tmp_a = Attack(self,self.pos,game_attacks[attack_in].copy(),self.direction) 
+            tmp_a = Attack(self,self.pos,attack_ent,self.direction) 
             return [tmp_a]
         else:
             return []
@@ -315,8 +317,24 @@ class moving_entity(Entity):
             if (self.state not in  ["idle","crouch"] )and abs(self.vel.x) < 0.2 and self.move_frame != 0:
                 self.move_frame = 0
             self.crouching ==False
-        elif not self.dead:
+        elif not self.dead: #self.state != "dead":
             self.state = "dying"
+        else:
+            self.state = "dead"
+                # print(self.move_frame)
+                # if self.move_frame> self.state_frames[self.state]-2:
+                #     self.dead = True
+                # if abs(self.vel.y)==0:
+                #     self.state = "dead"
+                #     self.dead = True
+                    
+            # else:
+            #     # print(self.state)
+            #     self.state = "dead"
+            #     self.dead = True
+       
+            
+            
 
         self.move_frame += self.state_inc[self.state]
         
@@ -326,6 +344,7 @@ class moving_entity(Entity):
         self.image = self.state_dict[self.state][self.direction][ int(self.move_frame)]
         # else:
             # self.state = "dead"
+            
         screen.blit(self.image, self.rect)
 class Attack(object):
     """
@@ -340,8 +359,7 @@ class Attack(object):
         self.entity.pos = vec(pos.x,pos.y)
         self.entity.vel = vec(self.entity.velocity*direction,0)
         self.entity.acc = vec(self.entity.accel*direction,0)
-        if entity in game_entities.keys():
-            self.entity = game_attacks[entity].copy()
+        self.entity = entity
         
     
     def update(self,screen):
@@ -356,4 +374,4 @@ class Attack(object):
             self.entity.move_no_friction()
             self.entity.update_sprite(screen)
             self.entity.hp-=1
-        
+            

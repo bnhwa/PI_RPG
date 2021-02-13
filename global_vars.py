@@ -9,15 +9,15 @@ from tkinter import *
 from tkinter.ttk import *
 import pygame as pg
 
-glob_player = None
+# glob_player = None
 #player characters
-game_entities = {}
-#enemies
-game_enemies = {}
-#levels
-game_levels = {}
-game_attacks = {}
-#screenx screeny
+# game_entities = {}
+# #enemies
+# game_enemies = {}
+# #levels
+# game_levels = {}
+# game_attacks = {}
+# #screenx screeny
 root = Tk() 
 screen_height = root.winfo_screenheight() 
 screen_width = root.winfo_screenwidth()

@@ -14,8 +14,8 @@ import os
 import sys
 import game_utils as ut
 from global_vars import *
-from Entity import Entity,moving_entity
-
+from Entity import Entity,moving_entity,load_game_entities
+from Enemies import Enemies
 
 import serial
 
@@ -52,6 +52,7 @@ class Player(object):
             ud_move = ut.get_bit(CONTROL_VAL,3)
             blue = ut.get_bit(CONTROL_VAL,4)
             red = ut.get_bit(CONTROL_VAL,5)
+            spell = ut.get_bit(CONTROL_VAL,6)
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
             if self.entity.hp>0: 
                 if lr_move:
@@ -62,6 +63,8 @@ class Player(object):
                 if ud_move:
                     if  up_down:#not
                         self.entity.jump()
+                    else:
+                        self.entity.crouch()
                 if blue:
                     self.attacks+=self.entity.do_attack("fireball")         
                 if red:
@@ -93,21 +96,7 @@ class Player(object):
         # if pressed_keys[pg.K_r]:
         #     self.entity.reset()
                 
-        
-class Enemies(moving_entity):
-    def __init__(self,entity,posX=0,posY=0):    
-        #make list of entities
-        self.entity = game_enemies[entity].copy()
-        self.entity.set_pos(posX,posY)
-    def update(self,screen):
-        
-        self.entity.stop()
-        self.entity.update(screen)
-        #depending on attack strategy, employ different one
-        ###ADD AI
-        
-        pass
-    
+
 
 
 
@@ -404,7 +393,8 @@ def run_game():
 if __name__ == '__main__':
 
     __spec__ = "ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>)"
-    load_entities()
+    load_game_entities()
+    # load_entities()
     glob_player=Player('jeanne')
     load_levels()
     get_serial()
