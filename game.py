@@ -26,8 +26,8 @@ class Player(object):
         self.entity = entity.copy()
         #make list of entities
             
-    def update(self,screen):#screen
-        self.entity.update(screen)
+    def update(self):#screen
+        self.entity.update(self.game.screen)
         self.entity.stop()
         pressed_keys = pg.key.get_pressed()
 
@@ -57,7 +57,7 @@ class Player(object):
             if a.entity.hp<=0 or a.dead:
                 self.attacks.remove(a)
             else:
-                a.update(screen)
+                a.update(self.game.screen)
 
 
 class Game:
@@ -65,12 +65,10 @@ class Game:
         global glob_player
         self.screen = pg.display.set_mode((screen_width, screen_height))
         self.game_entities = {}
-        # self.game_enemies = {}
         self.game_attacks = {}
         self.game_levels = {}
         self.load_game_entities()
         _player.set_char(self.game_entities[char_start])
-        
         glob_player = _player
         self.player = _player
         self.player.game = self
@@ -136,7 +134,6 @@ class Game:
             ok = curr_path+i+"/"
             print(ok)
             self.game_entities[i] = moving_entity(i,curr_path+i+"/")
-            # self.game_enemies[i] = moving_entity(i,curr_path+i+"/")
         dirs, curr_path = ut.get_dirs("/bin/attacks")
         for i in dirs:
             if verbose :

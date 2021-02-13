@@ -37,13 +37,13 @@ class Player(object):
         self.entity = entity.copy()
         
         
-    def update(self,screen):#screen
-        self.entity.update(screen)
+    def update(self):#screen
+        get_serial()
+        self.entity.update(self.game.screen)
         self.entity.stop()
         self.entity.cooldown-=1
         pressed_keys = pg.key.get_pressed()
         if USE_ESP:
-            
             left_right = ut.get_bit(CONTROL_VAL,0)
             lr_move = ut.get_bit(CONTROL_VAL,1)
             up_down = ut.get_bit(CONTROL_VAL,2)
