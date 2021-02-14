@@ -88,7 +88,7 @@ class Entity(pg.sprite.Sprite):
                 fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
-                self.state_inc[spr]=float(60/len(fls))/20
+                self.state_inc[spr]=1.5*float(60/len(fls))/20
                 #if self.moving_entity
                 self.state_dict[spr]={
                     1: [],#right=1
