@@ -36,10 +36,21 @@ class Player(Entity_controller):
         
     def set_char(self, entity):
         super(Player, self).__init__("player",entity,self.game)
-        
+    def status(self):
+        global click
+        get_serial()
+        left_right = ut.get_bit(CONTROL_VAL,0)
+        lr_move = ut.get_bit(CONTROL_VAL,1)
+        up_down = ut.get_bit(CONTROL_VAL,2)
+        ud_move = ut.get_bit(CONTROL_VAL,3)
+        blue = ut.get_bit(CONTROL_VAL,4)
+        red = ut.get_bit(CONTROL_VAL,5)
+        if lr_move:
+            click=True
+            
         
     def update(self):#screen
-        global DIFFICULTY,click
+        global DIFFICULTY
         get_serial()
         super().update()
 

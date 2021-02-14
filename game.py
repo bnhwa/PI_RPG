@@ -26,7 +26,8 @@ class Player(Entity_controller):
     def set_char(self, entity):
         super(Player, self).__init__("player",entity,self.game)
 
-            
+    def status(self):
+        pass
     def update(self):#screen
         global DIFFICULTY
         super().update()
@@ -93,7 +94,7 @@ class Game:
 
         self.done = False
         self.clock = pg.time.Clock()
-
+    
     def run(self):
         global DIFFICULTY
         while not self.done:
@@ -140,15 +141,16 @@ class Game:
         print(screen_name_use)
         global click
         running = True
+        
         while running:
-            if USE_ESP:
-                self.player.update()
-                pass
+            pass
             self.screen.fill((0,0,0))
             self.screens[screen_name_use].update()
      
             mx, my = pg.mouse.get_pos()     
             click = False
+            if USE_ESP:
+                self.player.status()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
