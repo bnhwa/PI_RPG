@@ -10,6 +10,7 @@ from tkinter import *
 from tkinter.ttk import *
 import pickle
 import pygame as pg
+
 import os
 import sys
 import game_utils as ut
@@ -30,7 +31,11 @@ class Player(Entity_controller):
         super().update()
 
         pressed_keys = pg.key.get_pressed()
-
+        if self.game.game_state<1:
+            #continue if dead
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    pass
         if self.entity.hp>0: 
             if pressed_keys[pg.K_LEFT]:
     
@@ -68,12 +73,16 @@ class Game:
         self.game_attacks = {}
         self.game_levels = {}
         self.load_game_entities()
+        self.screens = {}
         _player.game = self
         _player.set_char(self.game_entities[char_start])
         self.player = _player
         self.load_levels()
-        
-        self.game_state=1
+        ####################
+        self.load_screens()
+        self.font = pg.font.SysFont(None, 20)
+        ######################
+        self.game_state=0
         self.level = "level_1"
 
         self.done = False
@@ -82,8 +91,13 @@ class Game:
     def run(self):
         while not self.done:
             self.event_loop()
-            
-            self.game_levels[self.level].update()
+            if self.game_state ==0:
+                #main menu
+                self.main_menu()
+                pass
+            elif self.game_state ==1:
+                self.game_levels[self.level].update()
+                pass
             # self.update()
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato
@@ -110,11 +124,52 @@ class Game:
 
 
     def main_menu(self):
-        pass
-
+        global click
+        running = True
+        while running:
+     
+            self.screen.fill((0,0,0))
+            self.screens["title"].update()
+            self.draw_text('main menu', self.font, (255, 255, 255), self.screen, 20, 20)
+     
+            mx, my = pg.mouse.get_pos()
+     
+            button_1 = pg.Rect(50, 100, 200, 50)
+            # button_2 = pygame.Rect(50, 200, 200, 50)
+            if button_1.collidepoint((mx, my)):
+                if click:
+                    # game()
+                    
+                    running=False
+                    self.game_state=1
+            # if button_2.collidepoint((mx, my)):
+            #     if click:
+            #         options()
+            pg.draw.rect(self.screen, (255, 0, 0), button_1)
+            # pygame.draw.rect(screen, (255, 0, 0), button_2)
+     
+            click = False
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        pg.quit()
+                        sys.exit()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        click = True
+     
+            pg.display.update()
+            self.clock.tick(FPS)
+    def draw_text(self,text, font, color, surface, x, y):
+        textobj = font.render(text, 1, color)
+        textrect = textobj.get_rect()
+        textrect.topleft = (x, y)
+        self.screen.blit(textobj, textrect)
+        
     def load_game_entities(self,verbose = False):
-        global game_entities
-        char_dir = "/bin/characters"
         #characters
         dirs, curr_path = ut.get_dirs("/bin/characters")
         for i in dirs:
@@ -142,9 +197,6 @@ class Game:
             self.game_attacks[i] = moving_entity(i,curr_path+i+"/")    
     
     def load_levels(self,verbose = False):
-        global game_levels
-        char_dir = "/bin/levels"
-    
         #characters
         dirs, curr_path = ut.get_dirs("/bin/levels")
         for i in dirs:
@@ -155,8 +207,56 @@ class Game:
             self.game_levels[i] = Level(i,curr_path+i+"/",self)
 
         pass
+    def load_screens(self,verbose = False):
+        global game_levels
+    
+        #screens
+        dirs, curr_path = ut.get_dirs("/bin/screens")
+        for i in dirs:
+            if verbose :
+                print(i)
+            ok = curr_path+i+"/"
+            print(ok)
+            # self.game_screens[i] = 
+            self.screens[i]=Stills(i,curr_path+i+"/",self)
 
+        pass
+class Stills(pg.sprite.Sprite):
+    def __init__(self,name,curr_path,game):
+        super(Stills, self).__init__()
+        self.name=name
+        self.game=game
+        self.pos  = vec(0,0)
+        self.state = "base"
+        self.move_frame = 0
+        self.state_frames={}
+        self.state_inc={}
+        self.state_dict={}
+        dirs, _ = ut.get_dirs(curr_path+"sprites",prepended=True)
+        # print(curr_path)
+        # print(dirs)
 
+        for spr in dirs:
+            fls, pth =  ut.get_files(curr_path+"sprites/"+spr,".png" ,prepended=True)
+            self.state_frames[spr]=len(fls)
+            self.state_inc[spr]=float(60/len(fls))/15
+            self.state_frames[spr]=len(fls)
+            self.state_dict[spr]=[]
+            for f in fls:
+                #default sprites are oriented to the left
+                img_base = pg.image.load(pth+f)
+                img_base=ut.resize_img(img_base,cY=screen_height)
+                #build right image
+                self.state_dict[spr].append(img_base)
+
+        self.image = self.state_dict["base"][0]
+    def update(self):
+        self.move_frame += self.state_inc[self.state]
+        
+        if  self.move_frame> self.state_frames[self.state]-1:
+            self.move_frame=0
+        self.image = self.state_dict[self.state][ int(self.move_frame)]
+        self.game.screen.blit(self.image, (self.pos.x, self.pos.y))
 if __name__ == '__main__':
     #load entities
     pg.init()

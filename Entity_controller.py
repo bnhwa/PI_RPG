@@ -11,6 +11,7 @@ class Entity_controller(object):
         self.id = _id
         self.game = game
         self.entity = entity.copy()
+        self.attacks = []
         if posX is not None and posY is not None:
             self.entity.set_pos(posX,posY)
         
@@ -19,7 +20,10 @@ class Entity_controller(object):
         self.entity.stop()
     def reset(self):
         self.entity.reset()
+        self.attacks = []
     def rect(self):
         return self.entity.rect
+    def set_pos(self,posX,posY):
+        self.entity.set_pos(posX,posY)
 
         

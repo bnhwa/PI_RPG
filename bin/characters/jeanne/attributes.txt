@@ -1,9 +1,9 @@
 moving_entity=1
-max_hp=10
-accel=5
-velocity=5
+max_hp=20
+accel=7
+velocity=6
 attack=normal
 range=5
 sprite_screen_ratio=10
 damage=5
-hp_regen=0.1
+hp_regen=0.2

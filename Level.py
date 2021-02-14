@@ -37,7 +37,7 @@ class Level(object):
         self.diff_level = 3
         self.entity_limit = 15
         ###
-        self.reset()
+        # self.reset()
         
         
     def load_entities(self, reset = False):
@@ -61,16 +61,18 @@ class Level(object):
         else:
             for m,v in zip(self.mov_entities,list(map(lambda x: x[1],attr_list))):
                 # print(v)
-                m.entity.set_pos(v[0],v[1])
+                m.set_pos(v[0],v[1])
                 m.reset()
         self.curr_moving+=self.mov_entities
 
-    def add_entity(self,entity_name,posX = None,posY =None):
+    def add_entity(self,entity_name,posX = None,posY =None,set_pos=False):
         if posX is None:
-            posX = screen_width/2+      ( [-1,1][round(random())])*(screen_width/2)
+            posX = screen_width/2+      ( [-1,1][round(random())])*(screen_width/4)
         if posY is None:
             posY = random()*screen_height
         tmp = Enemies(self.game.game_entities[entity_name],self.game,posX=posX,posY=posY)
+        if (posX is not None and posY is not None) or set_pos:
+            tmp.set_pos(posX,posY)
         self.enemies.append(tmp)
         # self.alive_enemies.append(tmp)
         self.mov_entities.append(tmp)
@@ -143,7 +145,7 @@ class Level(object):
         if len(self.curr_moving)==1 and len(self.mov_entities)<self.entity_limit*2:
             self.diff_level+=1
             for i in range(self.diff_level):
-                self.add_entity("slime")
+                self.add_entity("slime",set_pos=True)
             if (self.diff_level % 2)==0:
                 DIFFICULTY+=1
             
