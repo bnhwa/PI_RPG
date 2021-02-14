@@ -18,9 +18,9 @@ from game import Game
 import serial
 
 ##globals
-fl_ = open("settings.txt","r")
-SERIAL_PORT = fl_.read().strip()
-fl_.close()
+# fl_ = open("settings.txt","r")
+SERIAL_PORT = settings_dict["serial"]
+# fl_.close()
 USE_ESP = 1
 CONTROL_VAL = 128
 baudrate = 9600

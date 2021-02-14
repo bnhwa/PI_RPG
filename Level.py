@@ -62,7 +62,6 @@ class Level(object):
                 m.entity.set_pos(v[0],v[1])
                 m.reset()
         self.curr_moving+=self.mov_entities
-        print(len(self.curr_moving))
 
 
     def reset(self):
@@ -139,8 +138,9 @@ class Level(object):
             moving_ent.acc.y = 0
             moving_ent.jumping = False
             moving_ent.onGround = True
-            if moving_ent.state == "dying":
-                moving_ent.dead = True
+            if moving_ent.hp<=0 and moving_ent.state == "dying":
+                # moving_ent.dead = True
+                moving_ent.state = "dead"
             # moving_ent.pos.y+=5
         else:
             moving_ent.onGround = False

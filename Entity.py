@@ -88,7 +88,7 @@ class Entity(pg.sprite.Sprite):
                 fls, pth =  ut.get_files(curr_path+"sprites"+"/"+spr,".png" ,prepended=True)
                 
                 self.state_frames[spr]=len(fls)
-                self.state_inc[spr]=1.5*float(60/len(fls))/20
+                self.state_inc[spr]=float(60/len(fls))/20
                 #if self.moving_entity
                 self.state_dict[spr]={
                     1: [],#right=1
@@ -223,10 +223,15 @@ class moving_entity(Entity):
 
     def reset(self):
         self.dead == False
+        self.jumping = False
+        self.running = False
+        self.onGround = False
+        self.crouching = False
         self.state = "idle"
         self.move_frame=0
         self.hp=self.max_hp
         print("{} reset".format(self.name))
+        # print(self.state)
         
     def set_pos(self,posX,posY):
         self.pos = vec(posX,posY)
@@ -317,10 +322,11 @@ class moving_entity(Entity):
             if (self.state not in  ["idle","crouch"] )and abs(self.vel.x) < 0.2 and self.move_frame != 0:
                 self.move_frame = 0
             self.crouching ==False
-        elif not self.dead: #self.state != "dead":
+        elif not self.state == "dead":#not self.dead: #self.state != "dead":
             self.state = "dying"
         else:
             self.state = "dead"
+
 
             
 

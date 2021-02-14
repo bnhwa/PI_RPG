@@ -8,19 +8,16 @@ Created on Fri Feb 12 12:28:29 2021
 from tkinter import * 
 from tkinter.ttk import *
 import pygame as pg
-
-# glob_player = None
-#player characters
-# game_entities = {}
-# #enemies
-# game_enemies = {}
-# #levels
-# game_levels = {}
-# game_attacks = {}
-# #screenx screeny
-root = Tk() 
-screen_height = int(root.winfo_screenheight()/2)
-screen_width = int(root.winfo_screenwidth()/2)
+import game_utils as ut
+fl_ = open("settings.txt","r")
+settings_dict = {i[0]:ut.t_convert(i[1]) for i in list(map( lambda x:x.split("="), fl_.read().replace(" ","").split("\n")   ))}
+fl_.close()
+root = Tk()
+screen_height = root.winfo_screenheight()
+screen_width = root.winfo_screenwidth()
+if not settings_dict["fullscreen"]:
+    screen_height = 864
+    screen_width = 1536
 #screen_height,screen_width = int(screen_height/2),int(screen_width/2)
 print(screen_width,screen_height)
 ##
