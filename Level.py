@@ -28,9 +28,11 @@ class Level(object):
         self.collidebg=pg.sprite.Group(self.terrain)
         self.mov_entities = []
         self.alive_enemies = []
+        self.curr_moving = []
         self.enemies = []
         self.attacks = []
         self.load_entities()
+        self.reset()
         
         
     def load_entities(self, reset = False):
@@ -50,20 +52,24 @@ class Level(object):
                 else:
                     tmp = Enemies(self.game.game_entities[k],self.game,posX=v[0],posY=v[1])
                     self.enemies.append(tmp)
-                    self.alive_enemies.append(tmp)
+                    # self.alive_enemies.append(tmp)
                     self.mov_entities.append(tmp)
+
                     
         else:
             for m,v in zip(self.mov_entities,list(map(lambda x: x[1],attr_list))):
                 # print(v)
                 m.entity.set_pos(v[0],v[1])
-                m.entity.reset()
-            
+                m.reset()
+        self.curr_moving+=self.mov_entities
+        print(len(self.curr_moving))
 
 
     def reset(self):
         #reset entities and their positions
         # Loading screen?
+        self.enemies = []
+        self.curr_moving = []
         self.attacks = []
         self.load_entities(reset=True)
         
@@ -79,20 +85,37 @@ class Level(object):
         #apply gravity and terrain check
         #--------------------------
         
-        for m in self.mov_entities:
-            if not m.entity.dead: #m.entity.state != "dead":
+        for m in self.curr_moving:
+            if m.entity.state != "dead":
                 m.entity.acc.y=+3;
                 self.terrain_check(m.entity)
+                m.update()
+            else:
+                self.curr_moving.remove(m)
+        # print(len(self.curr_moving))
             # self.basic_check(m.entity)
-            m.update()
+        for m in self.mov_entities:
+            m.entity.render(self.screen)
         #--------------------------
         #attack collision: Player attacks to enemies
         #--------------------------
-        for a in self.player.attacks:
-            for m in self.alive_enemies:
-                if a.entity.rect.colliderect(m.entity.rect):
+        for a in self.player.attacks:#get all entity attacks
+            for m in self.curr_moving:
+                # attacks "all" damage all, else, "player" attacks wont damage player
+                if a.attack_id != m.id and a.entity.rect.colliderect(m.rect()):
+                    # print(a.attack_id, m.id)
                     m.entity.hp-=a.entity.damage
-                    a.dead = True
+        #             a.dead = True
+        #--------------------------
+        #attack collision: all friendly-fire attacks 
+        #--------------------------
+        # for a in self.player.attacks:#get all entity attacks
+        #     for m in self.curr_moving:
+        #         # attacks "all" damage all, else, "player" attacks wont damage player
+        #         if a.attack_id != m.id and a.entity.rect.colliderect(m.entity.rect):
+        #             m.entity.hp-=a.entity.damage
+        #             a.dead = True
+                
             # .colliderect(m.entity.rect)
         
         #--------------------------

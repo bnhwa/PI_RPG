@@ -231,13 +231,13 @@ class moving_entity(Entity):
     def set_pos(self,posX,posY):
         self.pos = vec(posX,posY)
     
-    def do_attack(self,game,attack_in = None):
+    def do_attack(self,game, attack_id,attack_in = None):
         attack_in = attack_in if attack_in is not None else self.attack
     
         if self.cooldown <=0:
             attack_ent = game.game_attacks[attack_in].copy()
             self.cooldown+=(attack_ent.cooldown*FPS)
-            tmp_a = Attack(self,self.pos,attack_ent,self.direction) 
+            tmp_a = Attack(self,self.pos,attack_ent,self.direction,attack_id) 
             return [tmp_a]
         else:
             return []
@@ -288,12 +288,12 @@ class moving_entity(Entity):
         #draw hp bar
         self.draw_hp_bar(screen)
         self.move()
-        self.update_sprite(screen)
+        self.update_sprite()
     
         
         
 
-    def update_sprite(self,screen):
+    def update_sprite(self):
         if self.hp>0:
             #self.hp>0:
             if self.onGround:
@@ -321,30 +321,17 @@ class moving_entity(Entity):
             self.state = "dying"
         else:
             self.state = "dead"
-                # print(self.move_frame)
-                # if self.move_frame> self.state_frames[self.state]-2:
-                #     self.dead = True
-                # if abs(self.vel.y)==0:
-                #     self.state = "dead"
-                #     self.dead = True
-                    
-            # else:
-            #     # print(self.state)
-            #     self.state = "dead"
-            #     self.dead = True
-       
-            
+
             
 
+        # else:
+            # self.state = "dead"
+    def render(self, screen):
         self.move_frame += self.state_inc[self.state]
         
         if  self.move_frame> self.state_frames[self.state]-1:
             self.move_frame=0
-        # print(self.state_frames[self.state])
         self.image = self.state_dict[self.state][self.direction][ int(self.move_frame)]
-        # else:
-            # self.state = "dead"
-            
         screen.blit(self.image, self.rect)
 class Attack(object):
     """
@@ -352,8 +339,9 @@ class Attack(object):
     attacks have pngs, range, damage and attributes,
     die after exceed range
     """
-    def __init__(self,sender, pos, entity, direction,level = None):
-        global game_attacks
+    def __init__(self,sender, pos, entity, direction,attack_id):
+        # print(attack_id)
+        self.attack_id = attack_id
         self.dead = False
         self.entity = entity
         self.entity.pos = vec(pos.x,pos.y)
@@ -372,6 +360,7 @@ class Attack(object):
                 self.dead= True
         else:
             self.entity.move_no_friction()
-            self.entity.update_sprite(screen)
+            self.entity.update_sprite()
+            self.entity.render(screen)
             self.entity.hp-=1
             

@@ -16,19 +16,23 @@ import game_utils as ut
 from global_vars import *
 from Entity import Entity,moving_entity
 from Level import Level, Background
+from Entity_controller import Entity_controller
         
-        
-class Player(object):
+class Player(Entity_controller):
     def __init__(self):
         self.attacks = []
         
     def set_char(self, entity):
-        self.entity = entity.copy()
+        super(Player, self).__init__("player",entity,self.game)
+        # self.entity = entity.copy()
+        # self.controller = self
         #make list of entities
             
     def update(self):#screen
-        self.entity.update(self.game.screen)
-        self.entity.stop()
+        super().update()
+        # self.entity.update(self.game.screen)
+        # self.entity.stop()
+        # print("asdfasdfasdf")
         pressed_keys = pg.key.get_pressed()
 
         if self.entity.hp>0: 
@@ -45,9 +49,9 @@ class Player(object):
                 self.entity.jump()
                 
             if pressed_keys[pg.K_a]:
-                self.attacks+=self.entity.do_attack(self.game)
+                self.attacks+=self.entity.do_attack(self.game, self.id)
             if pressed_keys[pg.K_s]:
-                self.attacks+=self.entity.do_attack(self.game,"fireball")
+                self.attacks+=self.entity.do_attack(self.game, self.id,attack_in="fireball")
             # if pressed_keys[pg.K_s]:
             # self.attacks+=self.entity.do_attack("fireball")   
         #deal with attack objects
@@ -68,10 +72,9 @@ class Game:
         self.game_attacks = {}
         self.game_levels = {}
         self.load_game_entities()
+        _player.game = self
         _player.set_char(self.game_entities[char_start])
-        glob_player = _player
         self.player = _player
-        self.player.game = self
         self.load_levels()
         
         self.game_state=1

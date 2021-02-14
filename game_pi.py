@@ -31,10 +31,12 @@ ser = serial.Serial(SERIAL_PORT,baudrate,timeout=0.0001)
         
 class Player(object):
     def __init__(self):
+        self.id = "player"
         self.attacks = []
         
     def set_char(self, entity):
         self.entity = entity.copy()
+        self.controller = self
         
         
     def update(self):#screen
@@ -64,9 +66,9 @@ class Player(object):
                     else:
                         self.entity.crouch()
                 if blue:
-                    self.attacks+=self.entity.do_attack(self.game,"fireball")         
+                    self.attacks+=self.entity.do_attack(self.game,attack_in="fireball",attack_id = self.id)         
                 if red:
-                    self.attacks+=self.entity.do_attack(self.game)   
+                    self.attacks+=self.entity.do_attack(self.game)
         else:
             if self.entity.hp>0: 
                 if pressed_keys[pg.K_LEFT]:
