@@ -91,9 +91,9 @@ class Level(object):
                 self.terrain_check(m.entity)
                 m.update()
             else:
+                #clean out "dead" entities for sake pf processing
                 self.curr_moving.remove(m)
         # print(len(self.curr_moving))
-            # self.basic_check(m.entity)
         for m in self.mov_entities:
             m.entity.render(self.screen)
         #--------------------------
