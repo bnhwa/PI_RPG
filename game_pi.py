@@ -67,8 +67,9 @@ class Player(Entity_controller):
             red = ut.get_bit(CONTROL_VAL,5)
             diff = ut.get_bit(CONTROL_VAL,6)
             print(diff)
-            if diff and DIFFICULTY==0:
-                DIFFICULTY=1
+            if diff:
+                if DIFFICULTY<1:
+                    DIFFICULTY=1
             if not diff:
                 DIFFICULTY=0
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
