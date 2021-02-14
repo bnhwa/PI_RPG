@@ -200,6 +200,7 @@ class moving_entity(Entity):
             self.max_hp = 0
 
     def copy(self):
+        global OFFSET
         copy_vals = {
             "state_dict":self.state_dict,
             "state_frames":self.state_frames,
@@ -209,10 +210,10 @@ class moving_entity(Entity):
         }
         ret = moving_entity(None,None,copy_vals=copy_vals)
         
-        ret.accel=self.accel
-        ret.velocity=self.velocity
+        ret.accel=self.accel*OFFSET
+        ret.velocity=self.velocity*OFFSET
         ret.attack=self.attack
-        ret.range=self.range
+        ret.range=self.range*OFFSET
         ret.max_hp = self.max_hp
         ret.cooldown = self.cooldown
         ret.damage = self.damage
@@ -258,7 +259,7 @@ class moving_entity(Entity):
             self.state="jumping"
             self.onGround = False
             self.jumping = True
-            self.vel.y = -50
+            self.vel.y = -50*OFFSET
             self.vel += self.acc
             self.pos += self.vel + 0.5 * self.acc  #
             self.rect.midbottom = self.pos
