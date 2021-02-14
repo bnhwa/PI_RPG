@@ -28,8 +28,8 @@ class Player(Entity_controller):
 
             
     def update(self):#screen
+        global DIFFICULTY
         super().update()
-
         pressed_keys = pg.key.get_pressed()
         if self.game.game_state<1:
             #continue if dead
@@ -53,6 +53,12 @@ class Player(Entity_controller):
                 self.attacks+=self.entity.do_attack(self.game, self.id)
             if pressed_keys[pg.K_s]:
                 self.attacks+=self.entity.do_attack(self.game, self.id,attack_in="fireball")
+            if pressed_keys[pg.K_d]:#and self.entity.onGround:
+                if not DIFFICULTY:
+                    DIFFICULTY=1
+
+                else:
+                    DIFFICULTY=0
             # if pressed_keys[pg.K_s]:
             # self.attacks+=self.entity.do_attack("fireball")   
         #deal with attack objects
@@ -96,6 +102,7 @@ class Game:
                 self.main_menu()
                 pass
             elif self.game_state ==1:
+                self.difficulty = DIFFICULTY
                 self.game_levels[self.level].update()
                 pass
             # self.update()

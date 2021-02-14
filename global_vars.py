@@ -34,5 +34,5 @@ vec = pg.math.Vector2
 FRIC = -0.10
 FPS =60
 USE_ESP=1
-DIFFICULTY=1
+DIFFICULTY=0
 click=False

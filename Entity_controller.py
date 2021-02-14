@@ -12,10 +12,12 @@ class Entity_controller(object):
         self.game = game
         self.entity = entity.copy()
         self.attacks = []
+        self.difficulty= 0
         if posX is not None and posY is not None:
             self.entity.set_pos(posX,posY)
         
     def update(self):
+        self.difficulty = self.game.difficulty
         self.entity.update(self.game.screen)
         self.entity.stop()
     def reset(self):

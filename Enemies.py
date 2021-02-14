@@ -17,10 +17,11 @@ class Enemies(Entity_controller):
         #make list of entities
 
     def update(self):
-        global DIFFICULTY
+        # global DIFFICULTY
+        # print(DIFFICULTY)
         super().update()
         # self.entity.stop()
-        if DIFFICULTY:
+        if self.difficulty:
             #if hard, jump towards player
             if self.entity.state not in ["dead","dying"]:
                 hdirec,vdirex = 0,0
@@ -28,8 +29,8 @@ class Enemies(Entity_controller):
                     hdirec=-1
                 elif self.entity.pos.x<self.game.player.entity.pos.x:
                     hdirec=1
-                self.entity.acc.x+=hdirec*self.entity.accel+(DIFFICULTY*random())
-                self.entity.damage = DIFFICULTY
+                self.entity.acc.x+=hdirec*self.entity.accel+(self.difficulty*random())
+                self.entity.damage = self.difficulty
                 if random()>0.1:
                     self.entity.jump()
 
