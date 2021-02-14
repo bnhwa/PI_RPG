@@ -54,7 +54,8 @@ class Player(Entity_controller):
             ud_move = ut.get_bit(CONTROL_VAL,3)
             blue = ut.get_bit(CONTROL_VAL,4)
             red = ut.get_bit(CONTROL_VAL,5)
-            DIFFICULTY = ut.get_bit(CONTROL_VAL,6)
+            if not ut.get_bit(CONTROL_VAL,6):
+                DIFFICULTY=0
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
             if self.entity.hp>0: 
                 if lr_move:
