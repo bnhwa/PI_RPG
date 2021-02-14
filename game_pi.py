@@ -39,6 +39,7 @@ class Player(Entity_controller):
         
         
     def update(self):#screen
+        global DIFFICULTY
         get_serial()
         super().update()
 
@@ -53,7 +54,7 @@ class Player(Entity_controller):
             ud_move = ut.get_bit(CONTROL_VAL,3)
             blue = ut.get_bit(CONTROL_VAL,4)
             red = ut.get_bit(CONTROL_VAL,5)
-            spell = ut.get_bit(CONTROL_VAL,6)
+            DIFFICULTY = ut.get_bit(CONTROL_VAL,6)
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
             if self.entity.hp>0: 
                 if lr_move:

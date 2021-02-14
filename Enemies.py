@@ -21,6 +21,16 @@ class Enemies(Entity_controller):
         # self.entity.stop()
         if DIFFICULTY:
             #if hard, jump towards player
+            if self.entity.state not in ["dead","dying"]:
+                hdirec,vdirex = 0,0
+                if self.entity.pos.x>self.game.player.entity.pos.x:
+                    hdirec=-1
+                elif self.entity.pos.x<self.game.player.entity.pos.x:
+                    hdirec=1
+                self.entity.acc.x+=hdirec*self.entity.accel
+                if random()>0.1:
+                    self.entity.jump()
+                
             
             pass
         else:
@@ -34,4 +44,3 @@ class Enemies(Entity_controller):
         ###ADD AI
         
         pass
-    
