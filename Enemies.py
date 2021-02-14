@@ -31,7 +31,7 @@ class Enemies(Entity_controller):
                     hdirec=1
                 self.entity.acc.x+=hdirec*self.entity.accel+(self.difficulty*random())
                 self.entity.damage = self.difficulty
-                if random()>0.1:
+                if random()<0.5:
                     self.entity.jump()
 
 
