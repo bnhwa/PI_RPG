@@ -66,6 +66,7 @@ class Player(Entity_controller):
             blue = ut.get_bit(CONTROL_VAL,4)
             red = ut.get_bit(CONTROL_VAL,5)
             diff = ut.get_bit(CONTROL_VAL,6)
+            print(diff)
             if diff and DIFFICULTY==0:
                 DIFFICULTY=1
             if not diff:
