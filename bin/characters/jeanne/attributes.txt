@@ -5,3 +5,5 @@ velocity=5
 attack=normal
 range=5
 sprite_screen_ratio=10
+damage=5
+hp_regen=0.1
