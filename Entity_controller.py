@@ -22,8 +22,4 @@ class Entity_controller(object):
     def rect(self):
         return self.entity.rect
 
-        #depending on attack strategy, employ different one
-        ###ADD AI
         
-        pass
-    

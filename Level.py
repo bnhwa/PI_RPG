@@ -121,6 +121,9 @@ class Level(object):
         # entity - entity collision
         #--------------------------
         # self.alive_enemies
+        for m in self.curr_moving:
+            if self.collision_entities(m,self.player):
+                self.player.entity.hp-=m.entity.damage
         
         
         
@@ -170,7 +173,14 @@ class Level(object):
             moving_ent.onGround = True
             if moving_ent.hp<=0: moving_ent.state = "dead"
             
-    def collision_entities(self):
+    def collision_entities(self,control1,control2):
+        #collision between entities
+        if control1.id == control2.id :return False
+        hits = pg.sprite.spritecollide(control1.entity, pg.sprite.Group(control2.entity), False, pg.sprite.collide_mask)
+        if hits:
+            return True
+        else:
+            return False
         #collide one by one
         # pg.sprite.spritecollide(self.player.entity, self.enemies, False, pg.sprite.collide_mask)
         

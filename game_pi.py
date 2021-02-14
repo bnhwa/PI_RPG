@@ -14,7 +14,7 @@ import sys
 import game_utils as ut
 from global_vars import *
 from game import Game
-
+from Entity_controller import Entity_controller
 import serial
 
 ##globals
@@ -29,21 +29,22 @@ currVal = 128
 ser = serial.Serial(SERIAL_PORT,baudrate,timeout=0.0001)
 
         
-class Player(object):
+class Player(Entity_controller):
     def __init__(self):
         self.id = "player"
         self.attacks = []
         
     def set_char(self, entity):
-        self.entity = entity.copy()
-        self.controller = self
+        super(Player, self).__init__("player",entity,self.game)
         
         
     def update(self):#screen
         get_serial()
-        self.entity.update(self.game.screen)
-        self.entity.stop()
-        self.entity.cooldown-=1
+        super().update()
+
+        # self.entity.update(self.game.screen)
+        # self.entity.stop()
+        self.entity.cooldown-=2
         pressed_keys = pg.key.get_pressed()
         if USE_ESP:
             left_right = ut.get_bit(CONTROL_VAL,0)
@@ -66,9 +67,9 @@ class Player(object):
                     else:
                         self.entity.crouch()
                 if blue:
-                    self.attacks+=self.entity.do_attack(self.game,attack_in="fireball",attack_id = self.id)         
+                    self.attacks+=self.entity.do_attack(self.game, self.id,attack_in="fireball") 
                 if red:
-                    self.attacks+=self.entity.do_attack(self.game)
+                    self.attacks+=self.entity.do_attack(self.game, self.id)
         else:
             if self.entity.hp>0: 
                 if pressed_keys[pg.K_LEFT]:

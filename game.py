@@ -24,15 +24,11 @@ class Player(Entity_controller):
         
     def set_char(self, entity):
         super(Player, self).__init__("player",entity,self.game)
-        # self.entity = entity.copy()
-        # self.controller = self
-        #make list of entities
+
             
     def update(self):#screen
         super().update()
-        # self.entity.update(self.game.screen)
-        # self.entity.stop()
-        # print("asdfasdfasdf")
+
         pressed_keys = pg.key.get_pressed()
 
         if self.entity.hp>0: 
