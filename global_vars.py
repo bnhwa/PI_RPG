@@ -19,7 +19,7 @@ screen_setting = settings_dict["fullscreen"]
 if  screen_setting==0:
     screen_height = 864
     screen_width = 1536
-elif screen_setting==-1:
+elif screen_setting==2:
     screen_height = int(root.winfo_screenheight()/1.5)
     screen_width = int(root.winfo_screenwidth()/1.5)
 #screen_height,screen_width = int(screen_height/2),int(screen_width/2)
