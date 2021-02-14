@@ -1,4 +1,4 @@
 player=340,200
 slime=800,150
 slime=480,150
-jeanne=500,300
+slime=600,300

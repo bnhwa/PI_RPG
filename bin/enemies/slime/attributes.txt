@@ -5,4 +5,4 @@ attack=normal
 range=1
 sprite_screen_ratio=10
 damage=0.25
-hp_regen=0.05
+hp_regen=0.001

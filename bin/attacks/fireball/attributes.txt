@@ -4,6 +4,6 @@ accel=2
 velocity=0
 attack=staff
 range=5
-damage = 5
+damage = 3
 sprite_screen_ratio=10
 cooldown = 0.5
