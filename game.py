@@ -31,6 +31,7 @@ class Player(Entity_controller):
     def update(self):#screen
         global DIFFICULTY
         super().update()
+        # print(DIFFICULTY)
         pressed_keys = pg.key.get_pressed()
         if self.game.game_state<1:
             #continue if dead
@@ -55,11 +56,10 @@ class Player(Entity_controller):
             if pressed_keys[pg.K_s]:
                 self.attacks+=self.entity.do_attack(self.game, self.id,attack_in="fireball")
             if pressed_keys[pg.K_d]:#and self.entity.onGround:
-                if not DIFFICULTY:
-                    DIFFICULTY=1
-
+                if not self.game.difficulty:
+                    self.game.difficulty=1
                 else:
-                    DIFFICULTY=0
+                    self.game.difficulty=0
             # if pressed_keys[pg.K_s]:
             # self.attacks+=self.entity.do_attack("fireball")   
         #deal with attack objects
@@ -84,6 +84,7 @@ class Game:
         _player.game = self
         _player.set_char(self.game_entities[char_start])
         self.player = _player
+        self.difficulty = DIFFICULTY
         self.load_levels()
         ####################
         self.load_screens()
@@ -98,20 +99,24 @@ class Game:
     def run(self):
         global DIFFICULTY
         while not self.done:
+            # self.difficulty = DIFFICULTY
+            # print(self.difficulty)
             self.event_loop()
             if self.game_state ==0:
                 #main menu
                 self.main_menu("title",reset=1)
 
             elif self.game_state ==1:
-                self.difficulty = DIFFICULTY
+                
                 self.game_levels[self.level].update()
-                if self.player.entity.state == "dead":    
+                # self.difficulty = DIFFICULTY
+                if self.player.entity.state == "dead":
                     self.game_state=2
             elif self.game_state ==2:
                 self.main_menu("game_over")
                 self.reset_level()
-                DIFFUCLTY=0
+                self.difficulty=0
+
             # self.update()
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato

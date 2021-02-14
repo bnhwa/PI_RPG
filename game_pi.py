@@ -33,6 +33,7 @@ class Player(Entity_controller):
     def __init__(self):
         self.id = "player"
         self.attacks = []
+        self.prev = 0
         
     def set_char(self, entity):
         super(Player, self).__init__("player",entity,self.game)
@@ -53,7 +54,7 @@ class Player(Entity_controller):
         global DIFFICULTY
         get_serial()
         super().update()
-
+        # print(DIFFICULTY)
         # self.entity.update(self.game.screen)
         # self.entity.stop()
         self.entity.cooldown-=2
@@ -66,12 +67,12 @@ class Player(Entity_controller):
             blue = ut.get_bit(CONTROL_VAL,4)
             red = ut.get_bit(CONTROL_VAL,5)
             diff = ut.get_bit(CONTROL_VAL,6)
-            print(diff)
-            if diff:
-                if DIFFICULTY<1:
-                    DIFFICULTY=1
+            # print(diff,DIFFICULTY)
+            
             if not diff:
-                DIFFICULTY=0
+                self.game.difficulty=1
+            else:
+                self.game.difficulty=0
             # print("v_yn:{},vm:{},h_yn:{},hm:{}".format(ud_move,up_down,lr_move,left_right))  
             if self.entity.hp>0: 
                 if lr_move:
