@@ -360,6 +360,7 @@ class Attack(object):
         self.entity.pos = vec(pos.x,pos.y)
         self.entity.vel = vec(self.entity.velocity*direction,0)
         self.entity.acc = vec(self.entity.accel*direction,0)
+        self.entity.angle = 1
         self.entity = entity
         
     

@@ -10,6 +10,7 @@ from global_vars import *
 import os
 import pygame as pg
 import game_utils as ut
+from random import random
 from Entity import Entity,moving_entity
 from Enemies import Enemies
 
@@ -32,6 +33,10 @@ class Level(object):
         self.enemies = []
         self.attacks = []
         self.load_entities()
+        ###
+        self.diff_level = 3
+        self.entity_limit = 15
+        ###
         self.reset()
         
         
@@ -50,10 +55,7 @@ class Level(object):
                     self.player.entity.set_pos(v[0],v[1])
                     self.mov_entities.append(self.player)
                 else:
-                    tmp = Enemies(self.game.game_entities[k],self.game,posX=v[0],posY=v[1])
-                    self.enemies.append(tmp)
-                    # self.alive_enemies.append(tmp)
-                    self.mov_entities.append(tmp)
+                    self.add_entity(k,v[0],v[1])
 
                     
         else:
@@ -63,10 +65,21 @@ class Level(object):
                 m.reset()
         self.curr_moving+=self.mov_entities
 
-
+    def add_entity(self,entity_name,posX = None,posY =None):
+        if posX is None:
+            posX = screen_width/2+      ( [-1,1][round(random())])*(screen_width/2)
+        if posY is None:
+            posY = random()*screen_height
+        tmp = Enemies(self.game.game_entities[entity_name],self.game,posX=posX,posY=posY)
+        self.enemies.append(tmp)
+        # self.alive_enemies.append(tmp)
+        self.mov_entities.append(tmp)
+        self.curr_moving+=[tmp]
+        
     def reset(self):
         #reset entities and their positions
         # Loading screen?
+        self.diff_level = 3
         self.enemies = []
         self.curr_moving = []
         self.attacks = []
@@ -74,6 +87,8 @@ class Level(object):
         
 
     def update(self):
+        global DIFFICULTY
+        ##########################
         self.bg.update(self.screen)
         self.terrain.update(self.screen)
         #player
@@ -92,6 +107,7 @@ class Level(object):
             else:
                 #clean out "dead" entities for sake pf processing
                 self.curr_moving.remove(m)
+
         # print(len(self.curr_moving))
         for m in self.mov_entities:
             m.entity.render(self.screen)
@@ -124,7 +140,13 @@ class Level(object):
         for m in self.curr_moving:
             if self.collision_entities(m,self.player):
                 self.player.entity.hp-=m.entity.damage
-        
+        if len(self.curr_moving)==1 and len(self.mov_entities)<self.entity_limit*2:
+            self.diff_level+=1
+            for i in range(self.diff_level):
+                self.add_entity("slime")
+            if (self.diff_level % 2)==0:
+                DIFFICULTY+=1
+            
         
         
     def terrain_check(self,moving_ent):
