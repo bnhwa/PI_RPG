@@ -19,11 +19,15 @@ class Enemies(Entity_controller):
     def update(self):
         super().update()
         # self.entity.stop()
-        
-        if self.entity.state != "dead" and self.entity.onGround:
-            direc = 1 if random() >0.5 else -1
-            self.entity.pos.x+= direc*self.entity.velocity
-        
+        if DIFFICULTY:
+            #if hard, jump towards player
+            
+            pass
+        else:
+            if self.entity.state != "dead" and self.entity.onGround:
+                direc = 1 if random() >0.5 else -1
+                self.entity.pos.x+= direc*self.entity.velocity
+            
         
         # self.entity.update(self.game.screen)
         #depending on attack strategy, employ different one

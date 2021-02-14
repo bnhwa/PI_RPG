@@ -131,10 +131,13 @@ class Level(object):
         """
         naive collision handling with background sprite
         """
+        global screen_width
         #apply gravity if no collision
         # if moving_ent.
         if moving_ent.rect.center[0]<=0:
-            moving_ent.pos.x=screen_width-moving_ent.rect.size[0]
+            moving_ent.pos.x=screen_width#-moving_ent.rect.size[0]
+        elif moving_ent.rect.center[0]>screen_width:
+            moving_ent.pos.x=0#int(moving_ent.rect.size[0]/2)
         hits = pg.sprite.spritecollide(moving_ent, pg.sprite.Group(self.terrain), False, pg.sprite.collide_mask)
         if hits:
             moving_ent.vel.y = 0
