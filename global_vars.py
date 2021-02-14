@@ -19,8 +19,8 @@ import pygame as pg
 # game_attacks = {}
 # #screenx screeny
 root = Tk() 
-screen_height = root.winfo_screenheight() 
-screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()/2
+screen_width = root.winfo_screenwidth()/2
 #screen_height,screen_width = int(screen_height/2),int(screen_width/2)
 print(screen_width,screen_height)
 ##
