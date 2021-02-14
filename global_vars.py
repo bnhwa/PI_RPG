@@ -25,7 +25,7 @@ if  screen_setting==0:
 elif screen_setting==2:
     screen_height = int(root.winfo_screenheight()/2)
     screen_width = int(root.winfo_screenwidth()/2)
-    OFFSET = screen_width/1536
+    OFFSET = (screen_width/1536)*1.5
     print(OFFSET)
 #screen_height,screen_width = int(screen_height/2),int(screen_width/2)
 print(screen_width,screen_height)
