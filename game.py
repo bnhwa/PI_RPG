@@ -101,9 +101,7 @@ class Game:
             if self.game_state ==0:
                 #main menu
                 self.main_menu("title",reset=1)
-                if USE_ESP:
-                    self.player.update()
-                pass
+
             elif self.game_state ==1:
                 self.difficulty = DIFFICULTY
                 self.game_levels[self.level].update()
@@ -113,8 +111,6 @@ class Game:
                 self.main_menu("game_over")
                 self.reset_level()
                 DIFFUCLTY=0
-                if USE_ESP:
-                    self.player.update()
             # self.update()
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato
@@ -145,7 +141,9 @@ class Game:
         global click
         running = True
         while running:
-     
+            if USE_ESP:
+                self.player.update()
+                pass
             self.screen.fill((0,0,0))
             self.screens[screen_name_use].update()
      
