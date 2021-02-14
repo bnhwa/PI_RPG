@@ -39,7 +39,7 @@ class Player(Entity_controller):
         
         
     def update(self):#screen
-        global DIFFICULTY
+        global DIFFICULTY,click
         get_serial()
         super().update()
 
@@ -87,8 +87,10 @@ class Player(Entity_controller):
                     
                 if pressed_keys[pg.K_a]:
                     self.attacks+=self.entity.do_attack()    
+                    click = True
                 if pressed_keys[pg.K_s]:
-                    self.attacks+=self.entity.do_attack("fireball")           
+                    self.attacks+=self.entity.do_attack("fireball")    
+                    click = True
         #deal with attack objects   
         for a in self.attacks:
             if a.entity.hp<=0 or a.dead:

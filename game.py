@@ -95,16 +95,22 @@ class Game:
         self.clock = pg.time.Clock()
 
     def run(self):
+        global DIFFICULTY
         while not self.done:
             self.event_loop()
             if self.game_state ==0:
                 #main menu
-                self.main_menu()
+                self.main_menu("title",reset=1)
                 pass
             elif self.game_state ==1:
                 self.difficulty = DIFFICULTY
                 self.game_levels[self.level].update()
-                pass
+                if self.player.entity.state == "dead":    
+                    self.game_state=2
+            elif self.game_state ==2:
+                self.main_menu("game_over")
+                self.reset_level()
+                DIFFUCLTY=0
             # self.update()
             pg.display.flip()
             #set fps pi 30 fps bc Raspberry pi is a potato
@@ -130,31 +136,16 @@ class Game:
             
 
 
-    def main_menu(self):
+    def main_menu(self,screen_name_use,reset = 0):
+        print(screen_name_use)
         global click
         running = True
         while running:
      
             self.screen.fill((0,0,0))
-            self.screens["title"].update()
-            self.draw_text('main menu', self.font, (255, 255, 255), self.screen, 20, 20)
+            self.screens[screen_name_use].update()
      
-            mx, my = pg.mouse.get_pos()
-     
-            button_1 = pg.Rect(50, 100, 200, 50)
-            # button_2 = pygame.Rect(50, 200, 200, 50)
-            if button_1.collidepoint((mx, my)):
-                if click:
-                    # game()
-                    
-                    running=False
-                    self.game_state=1
-            # if button_2.collidepoint((mx, my)):
-            #     if click:
-            #         options()
-            pg.draw.rect(self.screen, (255, 0, 0), button_1)
-            # pygame.draw.rect(screen, (255, 0, 0), button_2)
-     
+            mx, my = pg.mouse.get_pos()     
             click = False
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -165,8 +156,10 @@ class Game:
                         pg.quit()
                         sys.exit()
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        click = True
+                    # if event.button == 1:
+                    click = True
+                    running=False
+                    self.game_state=reset
      
             pg.display.update()
             self.clock.tick(FPS)
@@ -246,7 +239,7 @@ class Stills(pg.sprite.Sprite):
         for spr in dirs:
             fls, pth =  ut.get_files(curr_path+"sprites/"+spr,".png" ,prepended=True)
             self.state_frames[spr]=len(fls)
-            self.state_inc[spr]=float(60/len(fls))/15
+            self.state_inc[spr]=float(60/len(fls))/30
             self.state_frames[spr]=len(fls)
             self.state_dict[spr]=[]
             for f in fls:

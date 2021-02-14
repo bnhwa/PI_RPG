@@ -100,7 +100,6 @@ class Level(object):
         #--------------------------
         #apply gravity and terrain check
         #--------------------------
-        
         for m in self.curr_moving:
             if m.entity.state != "dead":
                 m.entity.acc.y=+3;
