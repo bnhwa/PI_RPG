@@ -50,6 +50,7 @@ class Level(object):
                         .split("\n") if i.strip() != ""]))
         attr_fl.close()
         if not reset:
+            self.mov_entities=[]
             for k,v in attr_list:
                 if k == "player":
                     self.player.entity.set_pos(v[0],v[1])
@@ -85,7 +86,7 @@ class Level(object):
         self.enemies = []
         self.curr_moving = []
         self.attacks = []
-        self.load_entities(reset=True)
+        self.load_entities(reset=False)
         
 
     def update(self):
