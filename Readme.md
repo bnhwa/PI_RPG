@@ -4,7 +4,7 @@
 
 ## <u>About</u>
 
-For this project, I built a mock console with a RPG game on it, controlled by a physical controller containing the ESP-32. The mock console, built from legos, contains the Raspberry Pi, augmented with some heat sinks and fans that I ripped from old computers. The controller is comprised of an ESP-32, connected to four controller components: 2 push buttons, 1 STPS switch, and 1 joystick. (I did all the animations by hand). In my game, you plait y as a knight trying to fend off slimes and various enemies which progressively get more aggressive and intelligent after each round of killing. This game allows for the switching of difficulties (AI activated ) via the STPS switich.
+For this project, I built a mock console off of the Raspberry Pi with a RPG game on it, connected to a physical game controller (also built by me). The mock console, built from Legos, contains the Raspberry Pi, augmented with some heat sinks and fans that I ripped from old computers. The controller is comprised of an ESP-32, connected to four controller components: 2 push buttons, 1 SPST switch, and 1 joystick. (I did all the animations by hand). In my game, you play as a knight trying to fend off slimes which progressively get more aggressive and intelligent after each round of killing. This game allows for the switching of difficulties (AI activated ) via the SPST switich.
 
 Demo of the Game itself: [Here](https://youtu.be/SlNXs4tczDE)
 
