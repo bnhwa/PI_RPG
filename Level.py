@@ -86,6 +86,7 @@ class Level(object):
         self.enemies = []
         self.curr_moving = []
         self.attacks = []
+        self.player.reset()
         self.load_entities(reset=False)
         
 
